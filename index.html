@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="empdata2k - the official homepage. 80x25 forever.">
+<title>empdata2k</title>
+<style>
+html,body{margin:0;padding:0;background:#000;color:#aaa}
+body{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;font-family:Consolas,"Lucida Console","Courier New",monospace}
+/* margin:auto centres the screen in the window (a phone in portrait is far taller than the
+   80x25 screen) and collapses to 0 when the page is taller, so nothing ever gets cut off */
+#wrap{position:relative;width:100%;max-width:1200px;box-sizing:border-box;padding:12px 0 20px;margin:auto;overflow-x:auto;overflow-y:hidden}
+#scr{display:block;margin:0 auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+#wrap::after{content:"";position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 3px)}
+noscript pre{color:#c0c0c0;font-size:11px;line-height:1.15;margin:20px auto;width:max-content}
+noscript pre a{color:#55ffff}
+a.proj{position:absolute;display:block;overflow:hidden;white-space:nowrap;text-indent:200%;color:transparent;outline:none}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="scr"></canvas></div>
+<noscript><pre>
+                              ██╗         ██╗            █████╗ ██╗
+                              ██║         ██║           ██╔══██╗██║
+ █████╗ ████████╗██████╗  ██████║ █████╗ ██████╗ █████╗ ╚═╝  ██║██║  ██╗
+██╔══██╗██╔██╔██║██╔══██╗██╔══██║ ╚═══██╗╚██╔══╝ ╚═══██╗   ███╔╝██║ ██╔╝
+███████║██║██║██║██║  ██║██║  ██║ ██████║ ██║    ██████║ ███╔═╝ █████╔╝
+██╔════╝██║██║██║██║  ██║██║  ██║██╔══██║ ██║   ██╔══██║██╔═╝   ██╔═██╗
+╚█████╗ ██║██║██║██████╔╝╚██████║╚██████║ ╚████╗╚██████║███████╗██║  ██╗
+ ╚════╝ ╚═╝╚═╝╚═╝██╔═══╝  ╚═════╝ ╚═════╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝
+                 ██║
+                 ╚═╝
+
+                 empdata2k - tHE oFFiCiAL hOMEPAGE - 1999-2026
+           (tURN oN jAVASCRiPT tO sEE tHE kNiGHTS aND tHE dRAGON)
+
+      pROJECTS: <a href="https://pineapple.empdata2k.com/">pineapple</a> - sTAY aWAKE, lOOK aCTiVE
+</pre></noscript>
+<script>
+(function(){
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/*  eMPDATA2K  ·  80 column text mode emulator with knights & dragon   */
+/* ------------------------------------------------------------------ */
+
+var COLS = 80;
+
+// CGA 16 colour palette
+var PAL = ['#000000','#0000aa','#00aa00','#00aaaa','#aa0000','#aa00aa','#aa5500','#aaaaaa',
+           '#555555','#5555ff','#55ff55','#55ffff','#ff5555','#ff55ff','#ffff55','#ffffff'];
+function C(i){ return PAL[i]; }
+
+var FONT = '"Perfect DOS VGA 437","Px437 IBM VGA8",Consolas,"Lucida Console","DejaVu Sans Mono","Courier New",monospace';
+
+/* ---------------------------- logo -------------------------------- */
+// lowercase glyphs in ANSI Shadow style (10 rows: ascender 0-6, x-height 2-6, descender 7-8)
+var GLYPHS = {
+  e:["        ","        "," █████╗ ","██╔══██╗","███████║","██╔════╝","╚█████╗ "," ╚════╝ ","        ","        "],
+  m:["         ","         ","████████╗","██╔██╔██║","██║██║██║","██║██║██║","██║██║██║","╚═╝╚═╝╚═╝","         ","         "],
+  p:["        ","        ","██████╗ ","██╔══██╗","██║  ██║","██║  ██║","██████╔╝","██╔═══╝ ","██║     ","╚═╝     "],
+  d:["     ██╗","     ██║"," ██████║","██╔══██║","██║  ██║","██║  ██║","╚██████║"," ╚═════╝","        ","        "],
+  a:["        ","        "," █████╗ "," ╚═══██╗"," ██████║","██╔══██║","╚██████║"," ╚═════╝","        ","        "],
+  t:[" ██╗   "," ██║   ","██████╗","╚██╔══╝"," ██║   "," ██║   "," ╚████╗","  ╚═══╝","       ","       "],
+  '2':[" █████╗ ","██╔══██╗","╚═╝  ██║","   ███╔╝"," ███╔═╝ ","██╔═╝   ","███████╗","╚══════╝","        ","        "],
+  k:["██╗     ","██║     ","██║  ██╗","██║ ██╔╝","█████╔╝ ","██╔═██╗ ","██║  ██╗","╚═╝  ╚═╝","        ","        "]
+};
+var WORD = "empdata2k";
+var LOGO_H = GLYPHS.e.length;
+var LOGO = [];
+for (var lr=0; lr<LOGO_H; lr++) LOGO.push(WORD.split('').map(function(l){ return GLYPHS[l][lr]; }).join(''));
+var LOGO_W = LOGO[0].length;
+var LOGO_LEFT = (COLS - LOGO_W) >> 1;
+var LOGO_TOP = 13;
+var GROUND_ROW = LOGO_TOP + LOGO_H + 3;
+var LOGO_GRAD = ['#ffffff','#f8f8f8','#f0f0f0','#e4e4e4','#d6d6d6','#c6c6c6','#b6b6b6','#a6a6a6','#969696','#888888'];
+var LOGO_SHADOW = '#2a2aa8';
+
+/* --------------------------- projects ----------------------------- */
+// one entry = pixel icon (7x8 px -> 7 cols x 4 rows of half blocks) + 3 text rows.
+// icon letters index PCOL, '.' is transparent; info/info2 print grey on the right edge.
+var PCOL = {g:'#55ff55', d:'#00aa00', y:'#ffe14a', n:'#ffd21e', N:'#e08a00', o:'#7a3000',
+            k:'#000000', w:'#ffffff', r:'#ff5555', b:'#5555ff'};
+var PROJECTS = [
+  { name:'pineapple', url:'https://pineapple.empdata2k.com/',
+    tag:'sTAY aWAKE, lOOK aCTiVE', info:'wiNDOWS tRAY uTiLiTY', info2:'bUiLT oN .NET 10',
+    icon:["...g...",
+          ".d.g.d.",
+          "..dgd..",
+          ".yyyyy.",
+          "nnknknn",
+          "nnnnnnn",
+          "nnooonn",
+          ".nnnnn."] }
+];
+var ICON_COL = 6, TEXT_COL = 16, PROJ_H = 4;
+var BLINK_EVERY = 90, BLINK_LEN = 4;   // icons blink every 4.5s, and once more while hovered
+var forceBlink = false;                // ?blink keeps the eyes shut, for screenshots
+function host(u){ return u.replace(/^https?:\/\//,'').replace(/\/$/,''); }
+function padLR(l,r){ return rep(' ',TEXT_COL) + l + rep(' ', Math.max(1, 79-TEXT_COL-vlen(l)-vlen(r))) + r; }
+function projectLines(p,hot){
+  var name = (hot?'§e':'§f') + p.name;
+  var tag  = (hot?'§f':'§7') + p.tag;
+  var url  = (hot?'§e»':'§8»') + ' ' + (hot?'§b':'§3') + host(p.url);
+  var info = (hot?'§7':'§8') + (p.info||'');
+  var info2= (hot?'§7':'§8') + (p.info2||'');
+  var out = [], pad = Math.ceil((PROJ_H-3)/2);
+  while (out.length < pad) out.push('');
+  out.push(padLR(name,info), padLR(tag,info2), padLR(url,''));
+  while (out.length < PROJ_H) out.push('');
+  return out;
+}
+function rule(t){
+  var mid = '§8░§7▒▓§f█ §-'+t+' §f█§7▓▒§8░';
+  var n = vlen(mid), left = (78-n-2)>>1, right = 78-n-2-left;
+  return ' §8'+rep('─',left)+' '+mid+' §8'+rep('─',right);
+}
+// (re)build the screen rows of a project: text (normal + highlighted variant) and the icon
+function applyProject(p){
+  var norm = projectLines(p,false), hl = projectLines(p,true);
+  p.hot = [];
+  for (var r=0;r<PROJ_H;r++){ SCREEN[p.row+r] = parseLine(norm[r], p.row+r); p.hot.push(parseLine(hl[r], p.row+r)); }
+  var cells = pixToCells(p.icon, PCOL);
+  for (var rr=0; rr<cells.length; rr++) for (var c=0;c<cells[rr].length;c++){ if (cells[rr][c]) SCREEN[p.row+rr][ICON_COL+c] = cells[rr][c]; }
+  // same icon with the eyes ('k') filled in, drawn for a few ticks so the icon blinks
+  p.wink = pixToCells(p.icon.map(function(row){ return row.replace(/k/g,'n'); }), PCOL);
+  p.blinkOff = Math.floor(Math.random()*BLINK_EVERY);
+}
+
+/* ------------------------- static screen -------------------------- */
+// colour codes inside strings:  §0..§f = CGA colour, §#rrggbb = custom, §- = auto
+function vlen(s){ var n=0; for (var i=0;i<s.length;i++){ if (s[i]==='§'){ i += (s[i+1]==='#') ? 7 : 1; continue; } n++; } return n; }
+function rep(ch,n){ return n>0 ? new Array(n+1).join(ch) : ''; }
+function bar(ch){ return ' ' + rep(ch,78); }
+function three(l,c,r){
+  var total=78, ll=vlen(l), cl=vlen(c), rl=vlen(r);
+  var cs = Math.floor((total-cl)/2);
+  return ' ' + l + rep(' ', Math.max(1, cs-ll)) + c + rep(' ', Math.max(1, total-rl-(cs+cl))) + r;
+}
+var lines = [];
+lines.push(bar('▄'));
+lines.push(three('§8░§7▒▓§f█ §fempdata2k §f█§7▓▒§8░', '§8- §7tHE oFFiCiAL hOMEPAGE §8-', '§8░§7▒▓§f█ §f1999-2026 §f█§7▓▒§8░'));
+lines.push(bar('▀'));
+while (lines.length < LOGO_TOP) lines.push('');
+LOGO.forEach(function(l){ lines.push(rep(' ',LOGO_LEFT)+l); });
+while (lines.length < GROUND_ROW) lines.push('');
+lines.push(bar('▄'));       // GROUND_ROW: the knights walk on this bar
+lines.push(three('§8░§7▒▓§f█ §fempdata2k.com §f█§7▓▒§8░', '§8- §7oNLiNE sINCE §f1999 §8-', '§8░§7▒▓§f█ §f80x25 4EVER §f█§7▓▒§8░'));
+lines.push(bar('▀'));
+lines.push('');
+lines.push('');
+lines.push('');
+lines.push(rule('pROJECTS'));
+lines.push('');
+lines.push('');
+PROJECTS.forEach(function(p){ p.row = lines.length; projectLines(p,false).forEach(function(l){ lines.push(l); }); lines.push(''); });
+lines.push('');
+lines.push(' §8'+rep('─',78));   // separates the projects from the scroller
+lines.push('');
+lines.push('');
+lines.push('');
+lines.push('');           // scroller row
+var ROWS = lines.length;
+var SCROLL_ROW = ROWS-1;
+
+function inLogo(r,c){ return r>=LOGO_TOP && r<LOGO_TOP+LOGO_H && c>=LOGO_LEFT && c<LOGO_LEFT+LOGO_W; }
+function autoColor(ch,r,c){
+  if (inLogo(r,c)) return ch==='█' ? LOGO_GRAD[r-LOGO_TOP] : LOGO_SHADOW;
+  if ('█▀▄▌▐▓▒░'.indexOf(ch)>=0) return C(7);
+  if ('─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬'.indexOf(ch)>=0) return C(8);
+  if (ch>='A'&&ch<='Z') return C(15);
+  if (ch>='a'&&ch<='z') return C(7);
+  if (ch>='0'&&ch<='9') return C(7);
+  if ('.:,'.indexOf(ch)>=0) return C(8);
+  return C(7);
+}
+function parseLine(s,r){
+  var out=[], col=null;
+  for (var i=0;i<s.length && out.length<COLS;i++){
+    var ch=s[i];
+    if (ch==='§'){
+      var n=s[i+1];
+      if (n==='-'){ col=null; i++; }
+      else if (n==='#'){ col=s.substr(i+1,7); i+=7; }
+      else { col=C(parseInt(n,16)); i++; }
+      continue;
+    }
+    out.push({ch:ch, fg: col || autoColor(ch,r,out.length)});
+  }
+  while (out.length<COLS) out.push({ch:' ', fg:C(7)});
+  return out;
+}
+var SCREEN = lines.map(parseLine);
+PROJECTS.forEach(applyProject);
+
+// terrain: top of the letters per column
+var SURF = [];
+for (var cc=0; cc<COLS; cc++){
+  var s = GROUND_ROW;
+  if (cc>=LOGO_LEFT && cc<LOGO_LEFT+LOGO_W){
+    for (var rr=0; rr<LOGO_H; rr++){ if (LOGO[rr][cc-LOGO_LEFT]!==' '){ s=LOGO_TOP+rr; break; } }
+  }
+  SURF[cc]=s;
+}
+function insideCols(c){ return c>=LOGO_LEFT && c<LOGO_LEFT+LOGO_W; }
+function isSolid(r,c){ return inLogo(r,c) && SCREEN[r][c].ch!==' '; }
+
+/* ----------------------------- tiles ------------------------------ */
+var canvas = document.getElementById('scr');
+var ctx = canvas.getContext('2d');
+var wrap = document.getElementById('wrap');
+var sCanvas = document.createElement('canvas');
+var cw=0, ch=0, dpr=1, fontPx=10;
+var tiles = {};
+
+var BOX = {
+  '─':{l:1,r:1}, '│':{u:1,d:1}, '┌':{r:1,d:1}, '┐':{l:1,d:1}, '└':{u:1,r:1}, '┘':{u:1,l:1},
+  '├':{u:1,d:1,r:1}, '┤':{u:1,d:1,l:1}, '┬':{l:1,r:1,d:1}, '┴':{l:1,r:1,u:1}, '┼':{u:1,d:1,l:1,r:1},
+  '═':{l:2,r:2}, '║':{u:2,d:2}, '╔':{r:2,d:2}, '╗':{l:2,d:2}, '╚':{u:2,r:2}, '╝':{u:2,l:2},
+  '╠':{u:2,d:2,r:2}, '╣':{u:2,d:2,l:2}, '╦':{l:2,r:2,d:2}, '╩':{l:2,r:2,u:2}, '╬':{u:2,d:2,l:2,r:2}
+};
+
+function drawBox(g,b){
+  var W=cw,H=ch, lw=Math.max(1,Math.round(W/8));
+  var cx=Math.floor(W/2), cy=Math.floor(H/2);
+  var dbl = b.u===2||b.d===2||b.l===2||b.r===2;
+  if (!dbl){
+    var x0=cx-Math.floor(lw/2), y0=cy-Math.floor(lw/2);
+    if (b.l) g.fillRect(0,y0,x0+lw,lw);
+    if (b.r) g.fillRect(x0,y0,W-x0,lw);
+    if (b.u) g.fillRect(x0,0,lw,y0+lw);
+    if (b.d) g.fillRect(x0,y0,lw,H-y0);
+    return;
+  }
+  var Ty=cy-Math.floor(lw/2)-lw, By=cy-Math.floor(lw/2)+lw;
+  var Lx=cx-Math.floor(lw/2)-lw, Rx=cx-Math.floor(lw/2)+lw;
+  function Hl(y,xa,xb){ g.fillRect(xa,y,xb-xa,lw); }
+  function Vl(x,ya,yb){ g.fillRect(x,ya,lw,yb-ya); }
+  var L=b.l,R=b.r,U=b.u,D=b.d;
+  if (L&&R&&!U&&!D){ Hl(Ty,0,W); Hl(By,0,W); return; }
+  if (U&&D&&!L&&!R){ Vl(Lx,0,H); Vl(Rx,0,H); return; }
+  if (R&&D&&!L&&!U){ Hl(Ty,Lx,W); Vl(Lx,Ty,H); Hl(By,Rx,W); Vl(Rx,By,H); return; }
+  if (L&&D&&!R&&!U){ Hl(Ty,0,Rx+lw); Vl(Rx,Ty,H); Hl(By,0,Lx+lw); Vl(Lx,By,H); return; }
+  if (U&&R&&!L&&!D){ Hl(By,Lx,W); Vl(Lx,0,By+lw); Hl(Ty,Rx,W); Vl(Rx,0,Ty+lw); return; }
+  if (U&&L&&!R&&!D){ Hl(By,0,Rx+lw); Vl(Rx,0,By+lw); Hl(Ty,0,Lx+lw); Vl(Lx,0,Ty+lw); return; }
+  if (U&&D&&R&&!L){ Vl(Lx,0,H); Vl(Rx,0,Ty+lw); Vl(Rx,By,H); Hl(Ty,Rx,W); Hl(By,Rx,W); return; }
+  if (U&&D&&L&&!R){ Vl(Rx,0,H); Vl(Lx,0,Ty+lw); Vl(Lx,By,H); Hl(Ty,0,Lx+lw); Hl(By,0,Lx+lw); return; }
+  if (L&&R&&D&&!U){ Hl(Ty,0,W); Hl(By,0,Lx+lw); Hl(By,Rx,W); Vl(Lx,By,H); Vl(Rx,By,H); return; }
+  if (L&&R&&U&&!D){ Hl(By,0,W); Hl(Ty,0,Lx+lw); Hl(Ty,Rx,W); Vl(Lx,0,Ty+lw); Vl(Rx,0,Ty+lw); return; }
+  Hl(Ty,0,Lx+lw); Hl(Ty,Rx,W); Hl(By,0,Lx+lw); Hl(By,Rx,W);
+  Vl(Lx,0,Ty+lw); Vl(Lx,By,H); Vl(Rx,0,Ty+lw); Vl(Rx,By,H);
+}
+
+function shade(g,chr){
+  var px=cw/8, py=ch/16;
+  for (var y=0;y<16;y++) for (var x=0;x<8;x++){
+    var on;
+    if (chr==='▒') on = ((x+y)&1)===0;
+    else { var a = (y&1)===0 ? (x&3)===0 : (x&3)===2; on = chr==='░' ? a : !a; }
+    if (!on) continue;
+    var x0=Math.round(x*px), x1=Math.round((x+1)*px), y0=Math.round(y*py), y1=Math.round((y+1)*py);
+    g.fillRect(x0,y0,x1-x0,y1-y0);
+  }
+}
+
+function drawGlyph(g,chr){
+  var W=cw,H=ch, cx=Math.floor(W/2), cy=Math.floor(H/2);
+  switch(chr){
+    case ' ': return;
+    case '█': g.fillRect(0,0,W,H); return;
+    case '▀': g.fillRect(0,0,W,cy); return;
+    case '▄': g.fillRect(0,cy,W,H-cy); return;
+    case '▌': g.fillRect(0,0,cx,H); return;
+    case '▐': g.fillRect(cx,0,W-cx,H); return;
+    case '░': case '▒': case '▓': shade(g,chr); return;
+  }
+  var b = BOX[chr];
+  if (b){ drawBox(g,b); return; }
+  g.font = fontPx+'px '+FONT;
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(chr, W/2, H/2+1);
+}
+
+function tile(chr,fg,bg){
+  var key = chr+'|'+fg+'|'+(bg||'');
+  var t = tiles[key];
+  if (t) return t;
+  t = document.createElement('canvas'); t.width=cw; t.height=ch;
+  var g = t.getContext('2d');
+  if (bg){ g.fillStyle=bg; g.fillRect(0,0,cw,ch); }
+  g.fillStyle=fg;
+  drawGlyph(g,chr);
+  tiles[key]=t;
+  return t;
+}
+
+function putCell(g,r,c,chr,fg,bg,clear){
+  if (c<0||c>=COLS||r<0||r>=ROWS) return;
+  var x=c*cw, y=r*ch;
+  if (clear){ g.fillStyle='#000'; g.fillRect(x,y,cw,ch); }
+  if (chr===' ' && !bg) return;
+  g.drawImage(tile(chr,fg,bg),x,y);
+}
+
+function fitFont(){
+  var g = document.createElement('canvas').getContext('2d');
+  var fs = ch*0.9;
+  g.font = fs+'px '+FONT;
+  var w = Math.max(g.measureText('W').width, g.measureText('Θ').width);
+  if (w > cw*0.95) fs *= (cw*0.95)/w;
+  fontPx = Math.max(6, Math.floor(fs));
+}
+
+function renderStatic(){
+  sCanvas.width = COLS*cw; sCanvas.height = ROWS*ch;
+  var g = sCanvas.getContext('2d');
+  g.fillStyle='#000'; g.fillRect(0,0,sCanvas.width,sCanvas.height);
+  for (var r=0;r<ROWS;r++) for (var c=0;c<COLS;c++){
+    var cell=SCREEN[r][c]; if (cell.ch===' ') continue;
+    g.drawImage(tile(cell.ch,cell.fg,cell.bg), c*cw, r*ch);
+  }
+}
+
+function layout(){
+  dpr = window.devicePixelRatio || 1;
+  var ncw = Math.floor(wrap.clientWidth*dpr/COLS);
+  ncw = Math.max(ncw, Math.round(4*dpr));
+  if (ncw===cw) return;
+  cw=ncw; ch=cw*2;
+  tiles = {};
+  fitFont();
+  canvas.width=COLS*cw; canvas.height=ROWS*ch;
+  canvas.style.width=(COLS*cw/dpr)+'px'; canvas.style.height=(ROWS*ch/dpr)+'px';
+  renderStatic();
+}
+
+/* ---------------------------- knights ----------------------------- */
+var KN_R = {
+  run0:  [" Θ  ","▐█─ ","/ \\ "],
+  run1:  [" Θ  ","▐█─ "," │  "],
+  jump:  [" Θ  ","▐█─ ","/ \\ "],
+  windup:[" Θ│ ","▐█  ","/ \\ "],
+  thrust:[" Θ  ","▐█══","/ \\ "],
+  dead:  ["    ","    ","▄Θ▄─"]
+};
+var MIR = {'▐':'▌','▌':'▐','/':'\\','\\':'/'};
+function mirrorRows(rows){ return rows.map(function(s){ return s.split('').reverse().map(function(c){ return MIR[c]||c; }).join(''); }); }
+var KN_L = {}; for (var k in KN_R) KN_L[k]=mirrorRows(KN_R[k]);
+
+var G = 0.25, MAXK = 12;
+var knights=[], fires=[], sparks=[], heat={};
+var tick=0, teamNext=0;
+
+function spawnKnight(o){
+  var k = { team:teamNext, x:0, fy:GROUND_ROW-1, dir:1, state:'run', vy:0, jvx:0.5,
+            anim:Math.floor(Math.random()*4), hp:2, flash:0, deadT:0, burnt:false,
+            atk:0, atkT:0, target:null, timer:0, under:null, wasInside:false, remove:false };
+  teamNext ^= 1;
+  for (var p in o) k[p]=o[p];
+  knights.push(k); return k;
+}
+function initKnights(){
+  for (var i=0;i<6;i++){
+    var c = LOGO_LEFT+2+Math.floor(Math.random()*(LOGO_W-4));
+    spawnKnight({x:c, fy:SURF[c]-1, dir:Math.random()<0.5?1:-1, wasInside:true});
+  }
+  for (var j=0;j<3;j++){
+    var c2 = 6+Math.floor(Math.random()*(COLS-12));
+    spawnKnight({x:c2, dir:Math.random()<0.5?1:-1, under:true, wasInside:insideCols(c2)});
+  }
+}
+function spawnEdgeKnight(){
+  var left = Math.random()<0.5;
+  spawnKnight({x: left?-3:COLS+2, dir: left?1:-1});
+}
+function killKnight(k,burnt){ k.state='dead'; k.deadT=0; k.burnt=burnt; k.target=null; }
+function startJump(k,vy0,jvx){ k.state='jump'; k.vy=-vy0; k.jvx=jvx; }
+
+// stand row (feet) available at column c for knight k coming from column fromCol
+function standAt(c,k,fromCol){
+  if (insideCols(c)){
+    var top = SURF[c]-1;
+    if (k.fy <= top+2.5) return top;                          // on the letters (steps up to 2 rows)
+    if (!insideCols(fromCol) && k.under!==true) return top;   // wall of letters ahead
+    return GROUND_ROW-1;
+  }
+  return GROUND_ROW-1;
+}
+
+function updateKnight(k){
+  if (k.state==='dead'){ if (++k.deadT>36) k.remove=true; return; }
+  if (k.flash>0) k.flash--;
+  if (k.state==='victory'){ if (--k.timer<=0) k.state='run'; return; }
+
+  if (k.state==='jump'){
+    var fromCol = Math.round(k.x);
+    k.vy += G; k.fy += k.vy; k.x += k.dir*k.jvx;
+    var col = Math.round(k.x);
+    var s = standAt(col,k,fromCol);
+    if (k.fy >= s){
+      var prevFy = k.fy - k.vy;
+      if (prevFy <= s+0.6){ k.fy=s; k.vy=0; k.state='run'; }
+      else {
+        k.x -= k.dir*k.jvx;                       // hit a wall side
+        if (k.vy>0){ var s2 = standAt(Math.round(k.x),k,fromCol); if (k.fy>=s2){ k.fy=s2; k.vy=0; k.state='run'; } }
+      }
+    }
+    if (k.x<-5||k.x>COLS+4) k.remove=true;
+    return;
+  }
+
+  // fight detection (grounded knights on the same level)
+  var best=null, bd=99;
+  for (var i=0;i<knights.length;i++){
+    var o=knights[i];
+    if (o===k||o.team===k.team||o.state==='dead'||o.state==='jump') continue;
+    var dx=Math.abs(o.x-k.x);
+    if (Math.abs(o.fy-k.fy)<=1 && dx<=3.2 && dx<bd){ best=o; bd=dx; }
+  }
+  if (best){
+    if (k.state!=='fight'){ k.state='fight'; k.atk=0; k.atkT=4+Math.floor(Math.random()*8); }
+    k.target=best; k.dir = best.x>=k.x?1:-1;
+  } else if (k.state==='fight'){ k.state='run'; k.target=null; }
+
+  if (k.state==='fight'){
+    if (--k.atkT<=0){
+      if (k.atk===0){ k.atk=1; k.atkT=4; }
+      else if (k.atk===1){
+        var t=k.target;
+        if (t && t.state!=='dead' && Math.abs(t.x-k.x)<=3.5 && Math.random()<0.5){
+          t.hp--; t.flash=2; sparks.push({x:Math.round(t.x), y:Math.round(t.fy)-1, t:3});
+          if (t.hp<=0){ killKnight(t,false); k.state='victory'; k.timer=16; k.atk=0; k.target=null; return; }
+        }
+        k.atk=2; k.atkT=5;
+      } else { k.atk=0; k.atkT=8+Math.floor(Math.random()*12); }
+    }
+    return;
+  }
+
+  // running
+  k.anim++;
+  var col0 = Math.round(k.x);
+  var inside = insideCols(col0);
+  if (k.wasInside && !inside) k.under=null;
+  k.wasInside = inside;
+  if (Math.random()<0.003){ k.dir=-k.dir; k.under=null; }
+
+  // look ahead for walls -> jump
+  for (var d=1; d<=6; d++){
+    var sc = col0 + k.dir*d;
+    var sa = standAt(sc,k,col0);
+    if (sa < k.fy-2){
+      if (!inside && insideCols(sc) && k.under===null){ k.under = Math.random()<0.35; return; }
+      var h = k.fy - sa;
+      if (h > 14){ k.dir=-k.dir; k.under=null; break; }
+      var vy0 = Math.sqrt(2*G*(h+1.5));
+      var tA = vy0/G;
+      var need = (d+0.5)/tA;
+      if (need <= 0.9){ startJump(k, vy0, Math.max(0.35,need)); return; }
+      break;
+    }
+    if (sa !== k.fy) break;
+  }
+
+  var nx = k.x + k.dir*0.5;
+  var ncol = Math.round(nx);
+  var st = standAt(ncol,k,col0);
+  if (st < k.fy){
+    if (k.fy-st <= 2){ k.x=nx; k.fy=st; } else { k.dir=-k.dir; k.under=null; }
+  } else if (st > k.fy){
+    if (st-k.fy <= 2){ k.x=nx; k.fy=st; }
+    else {
+      var rnd=Math.random();
+      if (rnd<0.6){ k.dir=-k.dir; }
+      else if (rnd<0.8){ startJump(k,1.3,0.6); }
+      else { k.x=nx; startJump(k,0,0.5); }
+    }
+  } else k.x=nx;
+  if (k.x<-5||k.x>COLS+4) k.remove=true;
+}
+
+function knightColor(k,chr,r){
+  if (k.state==='dead') return k.burnt ? (k.deadT<10 ? C(6) : C(8)) : C(8);
+  if (k.flash>0) return C(15);
+  if (chr==='Θ') return C(15);
+  if (chr==='▐'||chr==='▌') return k.team ? C(9) : C(12);
+  if (chr==='█') return C(7);
+  if (r===2) return C(7);
+  return C(15);
+}
+
+function drawKnight(k){
+  var frame;
+  if (k.state==='dead') frame='dead';
+  else if (k.state==='jump') frame='jump';
+  else if (k.state==='victory') frame='windup';
+  else if (k.state==='fight') frame = k.atk===1 ? 'windup' : k.atk===2 ? 'thrust' : 'run0';
+  else frame = ((k.anim>>1)&1) ? 'run1' : 'run0';
+  var rows = (k.dir>0 ? KN_R : KN_L)[frame];
+  var x0 = Math.round(k.x) - (k.dir>0 ? 1 : 2);
+  var y0 = Math.round(k.fy) - 2;
+  for (var r=0;r<3;r++) for (var c=0;c<4;c++){
+    var chr=rows[r][c]; if (chr===' ') continue;
+    putCell(ctx, y0+r, x0+c, chr, knightColor(k,chr,r), null, true);
+  }
+}
+
+/* --------------------------- taps --------------------------------- */
+// clicking anywhere in the top block (header bar down to the footer bar) summons a
+// knight: a ring and a burst of sparks, then it pops up out of the nearest black spot.
+var FIELD_TOP = 3, FIELD_BOT = GROUND_ROW-1;   // rows the knights may be spawned on
+var BLOCK_BOT = GROUND_ROW+2;                  // last row that still counts as a click
+var HARDK = 60;                                // sanity cap for very eager clicking
+var puffs = [], rings = [];
+function spawnBurst(x,y,col){
+  rings.push({ x:x, y:y, t:0, col:col });
+  for (var i=0;i<18;i++){
+    var a = i/18*6.283 + Math.random()*0.3, sp = 0.4+Math.random()*0.8;
+    puffs.push({ x:x, y:y, vx:Math.cos(a)*sp*1.7, vy:Math.sin(a)*sp*0.85, life:0, max:9+Math.random()*9, col:col });
+  }
+}
+function updateBurst(){
+  for (var i=puffs.length-1;i>=0;i--){
+    var p=puffs[i]; p.life++; p.x+=p.vx; p.y+=p.vy; p.vx*=0.85; p.vy=p.vy*0.85+0.035;
+    if (p.life>=p.max) puffs.splice(i,1);
+  }
+  for (var j=rings.length-1;j>=0;j--) if (++rings[j].t>6) rings.splice(j,1);
+}
+function drawBurst(){
+  for (var j=0;j<rings.length;j++){
+    var g=rings[j], rr=0.8+g.t*1.5, chr = g.t<2 ? '▓' : g.t<4 ? '▒' : '░';
+    for (var a=0;a<26;a++){
+      var an=a/26*6.283;
+      putCell(ctx, Math.round(g.y+Math.sin(an)*rr*0.5), Math.round(g.x+Math.cos(an)*rr), chr, g.col, null, false);
+    }
+  }
+  for (var i=0;i<puffs.length;i++){
+    var p=puffs[i], f=p.life/p.max;
+    var pc = f<0.3 ? '*' : f<0.6 ? '+' : '·';
+    putCell(ctx, Math.round(p.y), Math.round(p.x), pc, p.col, null, false);
+  }
+}
+// the whole 3x4 sprite has to fit in empty cells: no letters, no frames
+function roomFor(r,c){
+  if (r-2 < FIELD_TOP || r > FIELD_BOT) return false;
+  for (var y=r-2; y<=r; y++) for (var x=Math.max(0,c-2); x<=Math.min(COLS-1,c+1); x++)
+    if (SCREEN[y][x].ch !== ' ') return false;
+  return true;
+}
+// nearest such spot to the clicked cell; rows weigh double, a cell is twice as tall as wide
+function freeSpot(r,c){
+  var best=null, bd=1e9;
+  for (var y=FIELD_TOP+2; y<=FIELD_BOT; y++) for (var x=0; x<COLS; x++){
+    var d = (x-c)*(x-c) + 4*(y-r)*(y-r);
+    if (d<bd && roomFor(y,x)){ bd=d; best={ r:y, c:x }; }
+  }
+  return best;
+}
+function onBlock(r,c){ return r>=0 && r<=BLOCK_BOT && c>=0 && c<COLS; }
+function cellAt(ev){
+  var b=canvas.getBoundingClientRect();
+  return { c: Math.floor((ev.clientX-b.left)/(cw/dpr)), r: Math.floor((ev.clientY-b.top)/(ch/dpr)) };
+}
+var popTeam = Math.random()<0.5 ? 0 : 1;                   // the colour the next popped knight gets
+function popKnight(r,c){
+  var spot = freeSpot(r,c); if (!spot) return;
+  var team = popTeam; popTeam = 1-popTeam;                 // red and blue take turns
+  spawnBurst(spot.c, spot.r-1, team ? C(9) : C(12));       // burst in the new knight's colour
+  if (knights.length >= HARDK) return;
+  spawnKnight({ x:spot.c, fy:spot.r, team:team, dir:Math.random()<0.5?1:-1,
+                state:'jump', vy:-1.0, jvx:0.3, wasInside:insideCols(spot.c) });
+}
+canvas.addEventListener('pointerdown', function(ev){
+  if (ev.button>0) return;
+  var p=cellAt(ev); if (!onBlock(p.r,p.c)) return;
+  popKnight(p.r,p.c);
+});
+canvas.addEventListener('mousemove', function(ev){
+  var p=cellAt(ev); canvas.style.cursor = onBlock(p.r,p.c) ? 'pointer' : '';
+});
+
+/* ---------------------------- dragon ------------------------------ */
+var DCOL = {g:'#00aa00', G:'#55ff55', d:'#007700', y:'#ffff55', r:'#ff5555', w:'#ffffff'};
+var DRAGON_BASE = [
+  "................................",
+  "................................",
+  "................................",
+  "......ww........................",
+  "....ggggg.......................",
+  "..ggggygggggggggggggggggggg.....",
+  ".gggggggggggGGGGGGGGGGGGgggggg..",
+  "rrggggggggggGGGGGGGGGGGGGggggggg",
+  "..ww..gggggggGGGGGGGGGGgggggg.gg",
+  "......ggg.ggg.........ggg.ggg..g",
+  "......gg...gg.........gg...gg...",
+  ".....ww...ww.........ww...ww...."
+];
+var WING_UP = {
+  0:"..............dddddddddd........",
+  1:"............ddddddddddddddd.....",
+  2:"...........dddd.ddddd.ddddd.....",
+  3:"..........ddd...ddd....ddd......",
+  4:".........ddd....dd.....dd......."
+};
+var WING_MID = {
+  3:".........ddddddddddddddddddd....",
+  4:".........dddd.ddddd.ddddd.dd...."
+};
+var WING_DOWN = {
+  8:".........ddd....................",
+  9:"..........ddd...ddd....ddd......",
+  10:"...........dddd.ddddd.ddddd.....",
+  11:"............ddddddddddddddd....."
+};
+function merge(base,ov){
+  return base.map(function(row,i){
+    var o=ov[i]; if (!o) return row;
+    return row.split('').map(function(ch,j){ return o[j] && o[j]!=='.' ? o[j] : ch; }).join('');
+  });
+}
+function pixToCells(rows,pal){
+  pal = pal || DCOL;
+  var h=rows.length/2, w=rows[0].length, out=[];
+  for (var r=0;r<h;r++){
+    var row=[];
+    for (var c=0;c<w;c++){
+      var t=rows[2*r][c], b=rows[2*r+1][c], T=t!=='.', B=b!=='.';
+      if (!T&&!B) row.push(null);
+      else if (T&&B) row.push(t===b ? {ch:'█',fg:pal[t],bg:null} : {ch:'▀',fg:pal[t],bg:pal[b]});
+      else if (T) row.push({ch:'▀',fg:pal[t],bg:null});
+      else row.push({ch:'▄',fg:pal[b],bg:null});
+    }
+    out.push(row);
+  }
+  return out;
+}
+var DRAGON_FRAMES = [WING_UP, WING_MID, WING_DOWN, WING_MID].map(function(w){ return pixToCells(merge(DRAGON_BASE,w)); });
+var DW = DRAGON_BASE[0].length, DH = DRAGON_BASE.length/2;
+var MOUTH_ROW = 3;
+
+var dragon = { x:-DW-4, y:4, dir:1, t:0, wait:0, alt:4, low:false, breathing:false };
+
+function updateDragon(){
+  if (dragon.wait>0){
+    if (--dragon.wait===0){
+      dragon.dir = -dragon.dir;
+      dragon.low = Math.random()<0.5;
+      dragon.alt = dragon.low ? 7 : 3.5;
+      dragon.y = dragon.alt;
+      dragon.x = dragon.dir>0 ? -DW-2 : COLS+2;
+      dragon.t = 0;
+    }
+    return;
+  }
+  dragon.t++;
+  dragon.x += dragon.dir*0.6;
+  var ty = dragon.alt + Math.sin(dragon.t*0.11)*(dragon.low?0.6:1.0);
+  dragon.y += (ty-dragon.y)*0.08;
+  var mouthCol = dragon.dir>0 ? dragon.x+DW : dragon.x-1;
+  var overLogo = mouthCol > LOGO_LEFT-10 && mouthCol < LOGO_LEFT+LOGO_W+10;
+  if (dragon.low) dragon.breathing = overLogo && (dragon.t%44)<24;
+  else dragon.breathing = (dragon.t%110)<7;
+  if (dragon.breathing){
+    var np = dragon.low ? 3 : 2;
+    for (var i=0;i<np;i++) spawnFire(mouthCol, dragon.y+MOUTH_ROW+(Math.random()-0.5)*0.8, dragon.dir, dragon.low);
+  }
+  if ((dragon.dir>0 && dragon.x>COLS+3) || (dragon.dir<0 && dragon.x<-DW-3)) dragon.wait = 40+Math.floor(Math.random()*80);
+}
+
+function drawDragon(){
+  if (dragon.wait>0) return;
+  var fr = DRAGON_FRAMES[(dragon.t>>2)&3];
+  var x0=Math.round(dragon.x), y0=Math.round(dragon.y);
+  for (var r=0;r<DH;r++) for (var c=0;c<DW;c++){
+    var cell=fr[r][c]; if (!cell) continue;
+    var cx = dragon.dir>0 ? DW-1-c : c;
+    putCell(ctx, y0+r, x0+cx, cell.ch, cell.fg, cell.bg, false);
+  }
+}
+
+/* ----------------------------- fire ------------------------------- */
+function spawnFire(x,y,dir,low){
+  fires.push({ x:x, y:y, vx:dir*(1.0+Math.random()*1.2), vy:(low?0.06:0.02)+Math.random()*0.16, life:0, max:16+Math.random()*14 });
+}
+function updateFire(){
+  for (var i=fires.length-1;i>=0;i--){
+    var p=fires[i];
+    p.life++; p.x+=p.vx; p.y+=p.vy; p.vy+=0.025; p.vx*=0.94;
+    var c=Math.round(p.x), r=Math.round(p.y);
+    var dead = p.life>=p.max || c<0||c>=COLS||r<0||r>=ROWS;
+    if (!dead && (isSolid(r,c) || r>=GROUND_ROW)){ heat[r*COLS+c]=1; dead=true; }
+    if (!dead){
+      for (var j=0;j<knights.length;j++){
+        var k=knights[j];
+        if (k.state==='dead') continue;
+        if (Math.abs(c-Math.round(k.x))<=1 && r>=Math.round(k.fy)-2 && r<=Math.round(k.fy)){ killKnight(k,true); dead=true; break; }
+      }
+    }
+    if (dead) fires.splice(i,1);
+  }
+  for (var key in heat){ heat[key]-=0.05; if (heat[key]<=0) delete heat[key]; }
+  for (var s=sparks.length-1;s>=0;s--){ if (--sparks[s].t<=0) sparks.splice(s,1); }
+}
+function drawFire(){
+  for (var i=0;i<fires.length;i++){
+    var p=fires[i], f=p.life/p.max;
+    var chr = f<0.35 ? '▓' : f<0.7 ? '▒' : '░';
+    var col = f<0.15 ? C(15) : f<0.4 ? C(14) : f<0.65 ? C(12) : f<0.85 ? C(4) : C(8);
+    putCell(ctx, Math.round(p.y), Math.round(p.x), chr, col, null, false);
+  }
+}
+function drawHeat(){
+  for (var key in heat){
+    var v=heat[key], r=Math.floor(key/COLS), c=key%COLS;
+    var cell=SCREEN[r][c];
+    var col = v>0.66 ? C(14) : v>0.33 ? C(12) : C(4);
+    putCell(ctx, r, c, cell.ch===' '?'░':cell.ch, col, null, true);
+  }
+}
+function drawSparks(){
+  for (var i=0;i<sparks.length;i++) putCell(ctx, sparks[i].y, sparks[i].x, '*', C(14), null, false);
+}
+
+/* ------------------------- stars & scroller ----------------------- */
+var stars=[];
+for (var si=0; si<34; si++) stars.push({ c:Math.floor(Math.random()*COLS), r:3+Math.floor(Math.random()*(LOGO_TOP-4)), ph:Math.random()*6.28, sp:0.04+Math.random()*0.08 });
+function drawStars(){
+  for (var i=0;i<stars.length;i++){
+    var s=stars[i], b=Math.sin(tick*s.sp+s.ph);
+    if (b<-0.3) continue;
+    putCell(ctx, s.r, s.c, '·', b>0.6 ? C(7) : C(8), null, false);
+  }
+}
+var SCROLL = '   »»»   wELCOME tO empdata2k   »»»   oNLiNE sINCE 1999, sTiLL 80x25 iN 2026   »»»   bEST vIEWED iN tEXT mODE oN a 14 iNCH cRT   »»»   nO fRAMEWORKS. nO cOOKiES. nO tRACKERS. jUST pURE aSCii aND oNE aNGRY dRAGON   »»»   kNiGHTS, pLEASE sTOP fIGHTiNG. tHE dRAGON iS wATCHiNG   »»»   cLiCK aNYWHERE uP tOP tO sUMMON a kNiGHT   »»»   ';
+PROJECTS.forEach(function(p){ SCROLL += 'cHECK oUT ' + p.name + ' - ' + p.tag + ' - ' + host(p.url) + '   »»»   '; });
+function drawScroller(){
+  var off = Math.floor(tick/2);
+  for (var c=0;c<COLS;c++){
+    var chr = SCROLL[(off+c)%SCROLL.length];
+    if (chr===' ') continue;
+    var col = (c<5||c>=COLS-5) ? C(1) : (c<11||c>=COLS-11) ? C(3) : C(11);
+    putCell(ctx, SCROLL_ROW, c, chr, col, null, false);
+  }
+}
+
+/* ------------------------- project links -------------------------- */
+// real <a> elements laid over the canvas rows: clickable, focusable, middle-click friendly.
+// hovering or focusing one highlights the entry on the canvas.
+var hot = -1, links = [];
+function initLinks(){
+  PROJECTS.forEach(function(p,i){
+    var a = document.createElement('a');
+    a.className='proj'; a.href=p.url; a.textContent = p.name+' - '+p.tag;
+    function on(){ hot=i; } function off(){ if (hot===i) hot=-1; }
+    a.addEventListener('mouseenter',on); a.addEventListener('focus',on);
+    a.addEventListener('mouseleave',off); a.addEventListener('blur',off);
+    wrap.appendChild(a); links.push(a);
+  });
+  placeLinks();
+}
+function placeLinks(){
+  var u=cw/dpr, v=ch/dpr, ox=canvas.offsetLeft, oy=canvas.offsetTop;
+  for (var i=0;i<links.length;i++){
+    var p=PROJECTS[i], st=links[i].style;
+    st.left=(ox+(ICON_COL-1)*u)+'px'; st.top=(oy+p.row*v)+'px';
+    st.width=((COLS-ICON_COL)*u)+'px'; st.height=(PROJ_H*v)+'px';
+  }
+}
+function drawIcons(){
+  for (var i=0;i<PROJECTS.length;i++){
+    var p = PROJECTS[i], ph = (tick + p.blinkOff) % BLINK_EVERY;
+    if (!forceBlink && ph >= BLINK_LEN && !(i===hot && ph >= 40 && ph < 40+BLINK_LEN)) continue;
+    for (var r=0;r<p.wink.length;r++) for (var c=0;c<p.wink[r].length;c++){
+      var cell = p.wink[r][c]; if (!cell) continue;
+      putCell(ctx, p.row+r, ICON_COL+c, cell.ch, cell.fg, cell.bg, true);
+    }
+  }
+}
+function drawProjects(){
+  if (hot<0) return;
+  var p = PROJECTS[hot];
+  for (var r=0;r<PROJ_H;r++) for (var c=TEXT_COL;c<COLS;c++){ var cell=p.hot[r][c]; putCell(ctx, p.row+r, c, cell.ch, cell.fg, null, true); }
+  if ((tick>>2)&1) putCell(ctx, p.row+3, TEXT_COL, ' ', C(14), null, true);   // blinking marker
+}
+
+/* ---------------------------- main loop --------------------------- */
+function step(){
+  tick++;
+  if (tick%36===0 && knights.length<MAXK) spawnEdgeKnight();
+  for (var i=0;i<knights.length;i++) updateKnight(knights[i]);
+  for (var j=knights.length-1;j>=0;j--) if (knights[j].remove) knights.splice(j,1);
+  updateDragon();
+  updateFire();
+  updateBurst();
+}
+function render(){
+  ctx.drawImage(sCanvas,0,0);
+  drawStars();
+  drawHeat();
+  for (var i=0;i<knights.length;i++) drawKnight(knights[i]);
+  drawSparks();
+  drawBurst();
+  drawFire();
+  drawDragon();
+  drawIcons();
+  drawProjects();
+  drawScroller();
+}
+
+var TICK_MS = 50, acc=0, last=0;
+function frame(now){
+  if (!last) last=now;
+  acc += Math.min(now-last, 250); last=now;
+  var n=0;
+  while (acc>=TICK_MS && n<5){ step(); acc-=TICK_MS; n++; }
+  if (n>0) render();
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener('resize', function(){ layout(); placeLinks(); });
+layout();
+initLinks();
+initKnights();
+// debug helpers: ?t=N fast-forwards N ticks, ?low forces low dragon passes,
+// ?hot=N highlights project N, ?blink shuts the icon eyes, ?pop taps the top block
+var qs = location.search;
+var qLow = /[?&]low(=|&|$)/.test(qs);
+if (qLow){ dragon.low=true; dragon.alt=7; dragon.y=7; }
+forceBlink = /[?&]blink(=|&|$)/.test(qs);
+var qHot = /[?&]hot=(\d+)/.exec(qs);
+if (qHot && PROJECTS[+qHot[1]]) hot = +qHot[1];
+if (/[?&]pop(=|&|$)/.test(qs)) for (var pk=0; pk<3; pk++) popKnight(LOGO_TOP+3+pk*3, LOGO_LEFT+10+pk*24);
+var qT = /[?&]t=(\d+)/.exec(qs);
+if (qT){ for (var ff=0; ff<Math.min(+qT[1],5000); ff++){ step(); if (qLow){ dragon.low=true; dragon.alt=7; } } }
+render();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
