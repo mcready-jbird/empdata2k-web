@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="empdata2k - Hieronymus Bosch, The Haywain: an animated text mode triptych you fly over with the mouse.">
+<title>empdata2k - tHE hAYWAiN</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000;color:#aaa;overscroll-behavior:none}
+body{font-family:Consolas,"Lucida Console","Courier New",monospace}
+#scr{position:fixed;left:0;top:0;display:block;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#crt{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 3px)}
+a.hud{position:fixed;display:block;overflow:hidden;white-space:nowrap;text-indent:200%;color:transparent;outline:none;cursor:pointer}
+noscript pre{color:#c0c0c0;font-size:12px;line-height:1.3;margin:40px auto;width:max-content}
+noscript pre a{color:#55ffff}
+</style>
+</head>
+<body>
+<canvas id="scr"></canvas>
+<div id="crt"></div>
+<a class="hud" id="back" href="./">back to empdata2k</a>
+<a class="hud" id="wings" href="#wings">open or close the wings</a>
+<noscript><pre>
+   hiERONYMUS bOSCH - tHE hAYWAiN
+
+   (tURN oN jAVASCRiPT tO fLY oVER tHE tRiPTYCH)
+
+   <a href="garden.html">tHE gARDEN oF eARTHLY dELiGHTS</a> · <a href="anthony.html">tHE tEMPTATiON oF sT aNTHONY</a>
+   <a href="./">« bACK tO empdata2k</a>
+</pre></noscript>
+<script src="triptych.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/*  eMPDATA2K  ·  tHE hAYWAiN                                           */
+/*  the paintings and the moving things; the engine is in triptych.js   */
+/* ------------------------------------------------------------------ */
+
+triptychWorld({ wing:88, title:'the haywain' });   // 384x144 cells
+
+function tree(cx,cy,r,R,fruit){
+  limb(cx,cy+r*2.2,cx,cy+r*0.5,Math.max(1,r*0.22),'n');
+  ball(cx,cy,r,['D','d','g','G']); ball(cx-r*0.6,cy+r*0.3,r*0.6,['D','d','g']); ball(cx+r*0.6,cy+r*0.3,r*0.6,['D','d','g']);
+  if (fruit) for (var i=0;i<r*1.5;i++){ var a=R()*6.28, d=Math.sqrt(R())*r*0.8; P(cx+Math.cos(a)*d, cy+Math.sin(a)*d, fruit); }
+}
+var HORSE=["..........N..", ".........nnn.", "........nnnnn", ".......Nnn...", "..nnnnnnnn...", ".Nnnnnnnnn...", ".N.nnnnnnn...", "...n.n..n.n..", "...N.N..N.N.."];
+function rider(x,y,dir,horse,o){ spr(x,y,HORSE,dir<0,horse); robed(dir>0?x+5:x+6,y+5,dir,o); }
+
+/* ============================ PARADISE ============================ */
+function paintEden(){
+  var R=RNG(41), W=PL.iw;
+  panel(PL.x,PL.y,PL.iw,PL.ih);
+  // heaven gold at the top, the sky below it
+  rect(0,0,W,90, vg(['S','s','a','b','c'],0,86));
+  for (var x=0;x<W;x++){ var top=Math.round(74+3*Math.sin(x*0.13)+2*Math.sin(x*0.31+1)); for (var y=top;y<90;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/10)); }
+  // god among the clouds, the rebel angels tumble out of heaven as insects
+  egg(44,34,20,4,['b','a','9']); egg(24,32,8,3,['b','a','9']); egg(64,32,8,3,['b','a','9']);
+  bigRobe(44,32,1,'r','R',{bless:true,beard:true,hair:'7'});
+  var angels=[[20,30,1],[28,32,1],[60,32,-1],[68,30,-1]];
+  for (var k=0;k<angels.length;k++){ var A=angels[k]; robed(A[0],A[1],A[2],{c:'9',d:'7',hair:'H',pose:2}); path([A[0]-A[2]*1,A[1]-7, A[0]-A[2]*3,A[1]-11, A[0]-A[2]*4,A[1]-8],'k'); }
+  for (var fa=0;fa<46;fa++){ var t=R(), fx=20+t*50+(R()-0.5)*26, fy=42+t*38+(R()-0.5)*8; P(fx,fy,'2'); P(fx-1,fy-1,'3'); P(fx+1,fy-1,'3'); if (R()<0.4) P(fx,fy+1,'1'); }
+  // the land of paradise
+  var grass=function(x,y){ var n=fbm((x+OX)*0.07,(y+OY)*0.1); return rampInk(['D','d','g','G','j'], 0.62+0.6*(n-0.5)-0.1*(y-88)/150); };
+  for (x=0;x<W;x++){ var gt=Math.round(86+2*Math.sin(x*0.09)); for (y=gt;y<240;y++) P(x,y,grass); P(x,gt,'j'); }
+  var rock=function(x,y){ return rampInk(['M','m','p','a'], 0.2+0.6*fbm((x+OX)*0.12,(y+OY)*0.08)); };
+  poly([0,120, 0,64, 5,58, 10,66, 14,62, 18,78, 16,96, 22,120], rock); ell(8,84,2,3,'x');
+  poly([88,130, 88,70, 82,76, 78,92, 81,108, 74,130], rock); ell(84,96,2,2.5,'x');
+  for (var s=0;s<W;s+=1){ var sy=150+Math.round(4*Math.sin(s*0.12)); P(s,sy,'w'); P(s,sy+1,'W'); if (s%3===0) P(s,sy+2,'w'); }   // a brook
+  tree(12,100,5,R,null); tree(70,104,4,R,null);
+  // eve is drawn out of sleeping adam's side
+  limb(14,110,30,110,1.8,'f'); limb(22,111,33,112,1.2,'F'); ell(11,109,2.3,2.2,'f'); ell(10,107.8,2.2,1.2,'h');
+  bigNude(26,110,1,{long:true,hair:'H',arm:'up',sk:'f'});
+  rect(18,110,16,1,'f');
+  bigRobe(50,114,-1,'p','P',{bless:true,beard:true,hair:'7'});
+  // the tree of knowledge, the serpent with a woman's body in it, adam and eve
+  limb(44,174,44,140,2.2,'n'); line(43,172,43,142,'t');
+  ball(44,132,12,['D','d','g','G']); ball(34,138,7,['D','d','g']); ball(54,138,7,['D','d','g']);
+  for (var ap=0;ap<14;ap++){ var aa=R()*6.28, ad=Math.sqrt(R())*10; P(44+Math.cos(aa)*ad, 133+Math.sin(aa)*ad*0.8,'r'); }
+  path([41,166, 47,162, 41,158, 47,154, 41,150, 46,146],'g'); path([42,166, 48,162, 42,158, 48,154, 42,150],'d');
+  limb(47,146,50,138,1.2,'f'); ell(51,135,1.8,2,'f'); ell(51,134,2,1.2,'H'); P(52,136,'2');
+  bigNude(32,176,1,{arm:'down'}); bigNude(58,176,-1,{long:true,hair:'H',arm:'reach'});
+  // the angel with the sword drives them out through the gate of paradise
+  poly([88,238, 88,186, 80,188, 72,196, 70,212, 66,238], rock); ell(80,226,5,11,'u'); ell(80,229,3.5,8,'0');
+  bigRobe(40,234,1,'r','R',{sword:true,wings:true,hair:'H'});
+  bigNude(58,236,1,{arm:'cover'}); bigNude(66,236,1,{long:true,hair:'H',arm:'cover'});
+  speck(R,0,92,W,146,70,'yk9j');
+}
+
+/* ========================== THE HAYWAIN =========================== */
+var HAY={x:90, y:124, rx:50, ry:60, base:172};
+var WHEELS=[[58,184,11],[122,184,11]];
+var LADDERS=[[30,198,47,130],[152,198,134,132]];
+function hayInk(x,y){
+  var n=fbm((x+OX)*0.55,(y+OY)*0.07);
+  return rampInk(['T','t','S','s'], 0.58-(x-HAY.x)/HAY.rx*0.26+0.5*(n-0.5)-(y-HAY.y)/HAY.ry*0.08);
+}
+function paintWagon(){
+  var R=RNG(42), W=PC.iw;
+  panel(PC.x,PC.y,PC.iw,PC.ih);
+  rect(0,0,W,100, vg(['c','b','a'],0,96));
+  // christ in the clouds, showing his wounds, in a golden glory
+  egg(90,26,17,14,['a','s','S','y'],0.2);
+  for (var a=0;a<28;a++){ var an=a/28*6.283; line(90+Math.cos(an)*9,26+Math.sin(an)*7.5,90+Math.cos(an)*17,26+Math.sin(an)*14,a&1?'s':'S'); }
+  var cl=[[74,40,8],[88,43,9],[104,40,8],[66,34,5],[114,34,5]];
+  for (var c=0;c<cl.length;c++) egg(cl[c][0],cl[c][1],cl[c][2],3,['b','a','9']);
+  poly([86,24, 94,24, 97,38, 83,38],'r'); line(86,25,84,37,'R'); line(93,25,95,37,'R');
+  rect(89,24,2,10,'f'); ell(90,20,2.2,2.6,'f'); ell(90,18.6,2.3,1.3,'n'); rect(89,22,2,1,'n');
+  limb(87,25,82,16,0.9,'f'); limb(93,25,98,16,0.9,'f'); P(82,15,'R'); P(98,15,'R');
+  // the far country and the field
+  for (var x=0;x<W;x++){
+    var top=Math.round(80+3*Math.sin(x*0.07+1)+2*Math.sin(x*0.21));
+    for (var y=top;y<100;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/12));
+  }
+  for (var tw=0;tw<5;tw++){ var tx=8+tw*6; rect(tx,76-(tw%3)*3,3,8+(tw%3)*3,'M'); P(tx+1,75-(tw%3)*3,'M'); }
+  var field=function(x,y){ var n=fbm((x+OX)*0.06,(y+OY)*0.09); var road=Math.abs(y-190)<14 ? 0.25 : 0; return road ? rampInk(['N','n','t','s'], 0.45+0.5*(n-0.5)) : rampInk(['D','d','g','G','j'], 0.62+0.6*(n-0.5)-0.1*(y-96)/150); };
+  for (x=0;x<W;x++){ var gt=Math.round(96+2*Math.sin(x*0.05)); for (y=gt;y<240;y++) P(x,y,field); P(x,gt,'j'); }
+  tree(20,104,6,R,null); tree(160,102,7,R,'r'); tree(172,112,4,R,null); tree(6,114,4,R,null);
+  // the wagon: bed, wheels (the spokes turn, see drawWheels), and the enormous load of hay
+  rect(36,168,108,6,'N'); for (var pl=38;pl<144;pl+=6) line(pl,168,pl,173,'u'); line(36,168,143,168,'n');
+  path([143,172, 160,178],'N'); path([143,173, 160,179],'n');
+  for (var w=0;w<WHEELS.length;w++){ var wh=WHEELS[w]; ring(wh[0],wh[1],wh[2],0.8,'N'); ring(wh[0],wh[1],wh[2]-1.3,0.5,'n'); ball(wh[0],wh[1],2,['N','n','t']); }
+  // a loaf rather than a ball: square in the flanks, round on top, bulging over the wheels
+  for (var j=Math.floor(HAY.y-HAY.ry-4); j<=HAY.base; j++) for (var i=HAY.x-HAY.rx-4; i<=HAY.x+HAY.rx+4; i++){
+    var dx=Math.abs(i-HAY.x)/HAY.rx, dy=(j-HAY.y)/HAY.ry, wob=0.1*(fbm(i*0.2,j*0.2)-0.5);
+    var inside = dy<0 ? Math.pow(dx,2.6)+Math.pow(-dy,1.8)<=1+wob : Math.pow(dx,3.2)+Math.pow(dy,4)<=1+wob;
+    if (inside) P(i,j,hayInk);
+  }
+  for (var st=0;st<90;st++){ var sx=HAY.x+(R()-0.5)*HAY.rx*1.7, sy=HAY.y-HAY.ry*0.7+R()*HAY.ry*1.5; var sdx=(sx-HAY.x)/HAY.rx, sdy=(sy-HAY.y)/HAY.ry; if (sdx*sdx+sdy*sdy<0.9 && sy<HAY.base) line(sx,sy,sx+(R()-0.5)*3,sy+3+R()*4,R()<0.5?'T':'s'); }
+  // on top: a bush with an owl, the lovers, the musicians, an angel praying and a blue devil piping
+  line(92,70,92,58,'N'); ball(92,56,7,['D','d','g']); ball(85,61,4.5,['D','d','g']); ball(99,61,4.5,['D','d','g']);
+  ell(92,48,1.6,2,'n'); P(92,46,'n'); P(91,47,'y'); P(93,47,'y');
+  robed(80,78,1,{c:'B',d:'x',hair:'h'}); robed(83,78,-1,{c:'r',d:'R',hair:'H'}); P(82,71,'f');
+  robed(98,79,-1,{c:'l',d:'B',hair:'H',pose:3}); rect(94,72,2,2,'9');
+  robed(104,79,-1,{c:'o',d:'R',hair:'h',hat:'cap',hc:'2',pose:3}); egg(100,74,2,1.5,['n','t']); line(98,73,95,71,'N');
+  robed(70,80,1,{c:'9',d:'7',hair:'H',pose:2}); path([69,73, 66,67, 63,64],'k'); path([70,73, 67,68, 64,66],'7'); ring(71,70,2.4,0.4,'S');
+  demon(113,80,-1,{c:'B',d:'l',kind:'horn'}); line(112,72,104,68,'n'); P(103,68,'S');
+  // ladders against the hay (people climb them, see drawClimbers)
+  for (var l=0;l<LADDERS.length;l++){ var L=LADDERS[l]; line(L[0],L[1],L[2],L[3],'N'); line(L[0]+3,L[1],L[2]+3,L[3],'N'); for (var rg=0;rg<1;rg+=0.08){ line(L[0]+(L[2]-L[0])*rg,L[1]+(L[3]-L[1])*rg,L[0]+3+(L[2]-L[0])*rg,L[1]+(L[3]-L[1])*rg,'t'); } }
+  // the ropes the devils pull on
+  line(158,178,166,181,'s'); line(158,178,176,184,'s'); line(158,179,166,190,'s'); line(158,179,176,193,'s');
+
+  // the crowd round the wagon, the great lords behind it, and the foreground, back to front
+  var items=[], RC=['r','B','e','g','o','n','8','l','P','t','2','d'];
+  function add(y,fn){ items.push({y:y,fn:fn}); }
+  add(172,function(){ rider(2,160,1,{n:'8',N:'6'},{c:'9',d:'7',hat:'tiara'}); });
+  add(176,function(){ rider(14,164,1,{n:'n',N:'N'},{c:'r',d:'R',hat:'crown'}); });
+  add(170,function(){ rider(24,158,1,{n:'O',N:'U'},{c:'B',d:'x',hat:'crown'}); });
+  add(181,function(){ rider(6,172,1,{n:'2',N:'1'},{c:'2',d:'1',hat:'hood',hc:'2'}); });
+  for (var cp=0;cp<34;cp++){
+    (function(){
+      var ang=R(), px, py;
+      if (ang<0.5){ px=30+Math.floor(R()*28); py=176+Math.floor(R()*22); } else { px=112+Math.floor(R()*32); py=176+Math.floor(R()*22); }
+      if (R()<0.3){ px=60+Math.floor(R()*60); py=190+Math.floor(R()*10); }
+      var col=RC[Math.floor(R()*RC.length)], hat=R()<0.25?'hood':R()<0.2?'hat':R()<0.2?'cap':null, pose=R()<0.45?1:R()<0.5?3:0, dir=px<90?1:-1;
+      add(py,function(){ robed(px,py,dir,{c:col,d:col==='8'?'7':col==='2'?'1':'N',hat:hat,hc:R()<0.5?'2':'r',pose:pose,hair:R()<0.3?'H':'h'}); });
+    })();
+  }
+  add(197,function(){ lier(52,197,1,'f','h'); P(55,196,'r'); });
+  add(198,function(){ lier(116,198,-1,'f','1'); P(119,197,'r'); });
+  // the quack at his table, a fortune teller, the fat monk, nuns filling a sack with hay, a piper
+  add(214,function(){ rect(12,208,16,2,'n'); line(13,210,13,214,'N'); line(26,210,26,214,'N'); ball(16,207,1,['8','9']); ball(21,207,1,['S','y']); robed(20,206,1,{c:'r',d:'R',hat:'tall',hc:'2',pose:3}); robed(30,214,-1,{c:'g',d:'d'}); });
+  add(224,function(){ robed(42,224,1,{c:'9',d:'7',hat:'turban',hc:'8',pose:3}); ball(40,219,1.3,['F','f']); robed(48,224,-1,{c:'e',d:'B',hat:'hat',hc:'n',pose:3}); });
+  add(230,function(){ egg(88,224,5,6,['u','N','n']); ell(88,215,2.2,2.4,'F'); rect(86,213,5,1,'N'); line(91,219,94,215,'F'); rect(94,213,2,2,'S'); line(85,229,85,231,'u'); line(91,229,91,231,'u'); });
+  add(233,function(){ egg(114,228,5,5,['t','s','9']); for (var hw=0;hw<6;hw++) P(111+hw,222+(hw&1),'S'); robed(104,233,1,{c:'2',d:'1',hat:'wimple',pose:3}); robed(122,233,-1,{c:'2',d:'1',hat:'wimple',pose:3}); robed(118,228,-1,{c:'2',d:'1',hat:'wimple',pose:1}); });
+  add(226,function(){ robed(146,226,1,{c:'o',d:'R',hat:'cap',hc:'r',pose:3}); egg(150,219,2,2.5,['P','p']); line(151,217,154,213,'N'); robed(158,226,-1,{c:'l',d:'B',hair:'H',pose:1}); robed(164,226,1,{c:'n',d:'N',pose:1}); });
+  add(238,function(){ ell(172,236,5,2,'u'); rect(169,229,6,5,'4'); ell(172,229,3,1,'3'); for (var fl=0;fl<5;fl++) P(169+fl,235,fl&1?'Y':'y'); robed(162,238,1,{c:'t',d:'n',pose:3}); });
+  add(236,function(){ egg(66,236,5,2.5,['n','t']); P(62,235,'0'); rect(64,238,1,2,'n'); rect(69,238,1,2,'n'); });   // a dog
+  items.sort(function(a,b){ return a.y-b.y; });
+  items.forEach(function(it){ it.fn(); });
+  speck(R,0,100,W,140,60,'yk9j');
+}
+
+/* ============================== HELL ============================== */
+var TOWER={x:46, rx:17, top:46, base:152};
+function paintHellH(){
+  var R=RNG(43), W=PR.iw;
+  panel(PR.x,PR.y,PR.iw,PR.ih);
+  rect(0,0,W,80, vg(['v','V','X','R','Y'],0,78));
+  for (var b=0;b<14;b++){
+    var bx=Math.floor(R()*W)-2, bw=3+Math.floor(R()*7), bh=5+Math.floor(R()*16);
+    rect(bx,78-bh,bw,bh,'0'); if (R()<0.5) poly([bx-0.5,78-bh, bx+bw-0.5,78-bh, bx+bw/2-0.5,78-bh-4-R()*5],'0');
+    for (var wn=0;wn<bw*bh/14;wn++) P(bx+1+Math.floor(R()*(bw-2)), 78-bh+2+Math.floor(R()*(bh-3)), R()<0.6?'Y':'y');
+  }
+  rect(0,78,W,162, function(x,y){ return rampInk(['v','V','i','I'], 0.18+0.55*fbm((x+OX)*0.08,(y+OY)*0.08)); });
+  var glows=[[10,200],[72,160],[40,228],[80,214],[16,120]];
+  for (var g=0;g<glows.length;g++){ ell(glows[g][0],glows[g][1],6,3,'X'); ell(glows[g][0],glows[g][1],3,1.5,'Z'); P(glows[g][0],glows[g][1],'Y'); }
+  // the tower the devils are building, brick by brick
+  for (var y=TOWER.top-6; y<=TOWER.base; y++){
+    var ragged = y<TOWER.top ? 1 : 0;
+    for (var x=TOWER.x-TOWER.rx; x<=TOWER.x+TOWER.rx; x++){
+      if (ragged && hash(x,7)>((y-(TOWER.top-6))/6)) continue;
+      var u=(x-TOWER.x)/TOWER.rx, joint=(y%4===0) || ((x+(Math.floor(y/4)%2)*3)%6===0);
+      P(x,y, joint ? 'u' : rampInk(['N','n','t','s'], 0.62-u*0.45+0.15*(hash(x>>1,y>>2)-0.5)));
+    }
+  }
+  for (var wi=0;wi<4;wi++){ var wy=70+wi*20; rect(TOWER.x-3+(wi%2)*6,wy,2,4,'0'); P(TOWER.x-3+(wi%2)*6,wy+1,'Y'); }
+  ell(TOWER.x,TOWER.base-5,4,7,'0'); rect(TOWER.x-4,TOWER.base-5,9,6,'0');
+  line(TOWER.x-TOWER.rx-2,TOWER.top-14,TOWER.x-TOWER.rx-2,TOWER.top+18,'n'); line(TOWER.x+TOWER.rx+2,TOWER.top-14,TOWER.x+TOWER.rx+2,TOWER.top+18,'n');
+  line(TOWER.x-TOWER.rx-4,TOWER.top-2,TOWER.x+TOWER.rx+4,TOWER.top-2,'t'); line(TOWER.x-TOWER.rx-4,TOWER.top+10,TOWER.x-TOWER.rx+3,TOWER.top+10,'t');
+  line(18,152,30,58,'N'); line(21,152,33,58,'N'); for (var rg=58;rg<152;rg+=4){ var lx=18+(152-rg)*12/94; line(lx+1,rg,lx+2,rg,'t'); }
+  // a bridge where a sinner is set upon, a devil fish swallowing one, a man on a spit
+  poly([0,178, 34,178, 34,183, 26,183, 17,180, 8,183, 0,183],'U'); line(0,178,34,178,'Q');
+  robed(14,177,1,{c:'e',d:'B',pose:1}); demon(20,177,-1,{c:'2',d:'3',kind:'rat'});
+  egg(66,198,12,7,['x','w','W']); ell(56,200,5,4,'R'); ell(55,200,3,2.5,'v'); P(64,194,'y'); P(64,194,'0');
+  rect(52,200,1,5,'f'); rect(54,201,1,4,'F'); rect(78,196,6,1,'W'); line(77,194,84,188,'W');
+  line(20,232,52,214,'n'); lier(28,227,1,'f','h'); demon(18,236,1,{c:'i',d:'I',kind:'bird'}); demon(52,222,-1,{c:'i',d:'I',kind:'horn'});
+  var people=[[74,176],[8,214],[84,236],[34,160],[62,236]];
+  for (var pe=0;pe<people.length;pe++) nude(people[pe][0],people[pe][1],Math.floor(R()*3),R()<0.5?1:-1,'f',R()<0.5?'h':'1');
+  var imps=[[80,178],[12,160],[70,238]];
+  for (var im=0;im<imps.length;im++) demon(imps[im][0],imps[im][1],im&1?1:-1,{c:'i',d:'I',kind:im===1?'bird':'horn',wings:im===2});
+  speck(R,0,80,W,160,30,'Z');
+}
+
+/* ======================== THE WAYFARER ============================ */
+// shut, the wings show the pedlar on the path of life, beset by the world on every side
+function paintWayfarer(){
+  var R=RNG(44), W=DOORS.w;
+  rect(0,0,W,120, vg(['c','b','a'],0,110));
+  for (var x=0;x<W;x++){ var top=Math.round(92+4*Math.sin(x*0.05)+2*Math.sin(x*0.17)); for (var y=top;y<124;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/14)); }
+  var land=function(x,y){ var n=fbm((x+OX)*0.05,(y+OY)*0.08), road=Math.abs(x-(20+(y-120)*0.55))<9 && y>150; return road ? rampInk(['n','t','s'],0.3+0.5*n) : rampInk(['D','d','g','G','j'], 0.6+0.6*(n-0.5)-0.12*(y-110)/130); };
+  for (x=0;x<W;x++){ var gt=Math.round(112+5*Math.sin(x*0.04+1)+3*Math.sin(x*0.13)); for (y=gt;y<244;y++) P(x,y,land); P(x,gt,'j'); }
+  // the gallows hill with its wheel and crows, far right
+  ell(160,112,26,10,'d'); ell(160,110,22,7,'g');
+  rect(150,82,2,26,'N'); rect(166,82,2,26,'N'); rect(149,82,20,2,'N'); line(158,84,158,92,'t'); rect(157,92,2,5,'F');
+  line(178,106,178,80,'N'); ring(178,79,4,0.6,'N'); P(178,79,'n');
+  // robbers strip a traveller tied to a tree, far left
+  limb(28,150,28,122,1.4,'n'); ball(28,118,7,['D','d','g']); ball(22,122,4,['D','d','g']);
+  bigNude(28,150,1,{arm:'up'}); robed(18,150,1,{c:'2',d:'1',hat:'hat',hc:'2',pose:3}); robed(38,151,-1,{c:'R',d:'N',hat:'cap',hc:'2',pose:3}); rect(40,146,4,2,'e');
+  // peasants dance to a bagpipe by the inn, right
+  poly([118,146, 146,146, 146,128, 118,128],'s'); poly([115,129, 132,116, 149,129],'R'); rect(126,136,4,10,'N'); rect(136,132,4,4,'x'); line(149,120,158,112,'N'); rect(156,108,6,4,'r');
+  robed(152,150,-1,{c:'g',d:'d',hat:'cap',hc:'r',pose:3}); egg(148,143,2,2.5,['P','p']);
+  tree(110,120,6,R,null); tree(96,130,4,R,null); tree(176,132,5,R,null);
+  // clouds, a windmill, a shepherd with his sheep, a couple under a tree
+  var clouds=[[40,30,12],[120,22,16],[160,46,10],[80,54,8]];
+  for (var cl=0;cl<clouds.length;cl++){ egg(clouds[cl][0],clouds[cl][1],clouds[cl][2],3.4,['b','a','9'],0.2); egg(clouds[cl][0]+4,clouds[cl][1]-2,clouds[cl][2]*0.6,2.4,['a','9'],0.3); }
+  rect(128,86,4,12,'8'); poly([127,86, 133,86, 130,82],'R'); line(122,78,138,94,'N'); line(122,94,138,78,'N');
+  for (var sh=0;sh<7;sh++){ var shx=112+sh*7+(sh%2)*3, shy=172+(sh%3)*6; egg(shx,shy,2.6,1.6,['7','8','9']); P(shx+2,shy-1,'2'); P(shx-1,shy+2,'2'); P(shx+1,shy+2,'2'); }
+  robed(166,176,-1,{c:'d',d:'D',hat:'hat',hc:'n',pose:3}); line(162,168,162,177,'n');
+  tree(150,196,8,R,'r'); robed(146,214,1,{c:'r',d:'R',hair:'H'}); robed(150,214,-1,{c:'B',d:'x'});
+  for (var fw=0;fw<20;fw++) P(98+Math.floor(R()*84),190+Math.floor(R()*50),R()<0.5?'y':'k');
+  // a stream with a plank bridge, bones in the grass
+  for (var sy=0;sy<44;sy++){ var sx=8+sy*0.4; for (var sw=-4;sw<=4;sw++) P(sx+sw,200+sy, sw===-4||sw===4?'W':'w'); }
+  rect(2,214,24,2,'n'); line(2,213,25,213,'t'); line(4,216,4,219,'N'); line(22,216,22,219,'N');
+  P(34,232,'9'); P(35,232,'9'); P(36,233,'9'); ell(30,236,1.5,1.2,'8'); P(29,236,'0'); P(31,236,'0');
+  // the wayfarer: a lean old pedlar with his basket, walking left and looking back at the dog
+  var sk='F';
+  limb(62,190,56,222,1.6,'Q'); limb(66,190,69,222,1.6,'U'); rect(52,221,6,2,'N'); rect(68,221,4,2,'F'); P(71,222,'q');
+  poly([54,158, 72,158, 76,194, 50,194], function(x){ return x>66 ? 'U' : (x-54)%4===0 ? 'Q' : 'O'; });
+  rect(52,180,24,2,'N'); ell(56,186,2,3,'S'); line(60,182,61,190,'7'); P(61,191,'8');
+  ell(76,168,10,14,function(x,y){ return ((x+y)&3)===0 ? 'n' : ((x-y)&3)===0 ? 'N' : x<72 ? 's' : 't'; }); ring(76,168,10,0.6,'N');
+  line(67,160,85,160,'N'); line(66,176,86,176,'N');
+  line(66,158,82,156,'N'); line(80,156,84,158,'n'); P(83,153,'9');
+  limb(56,162,48,176,1.2,'O'); P(47,177,sk); P(46,178,sk);
+  limb(68,164,74,178,1.2,'U'); line(76,176,90,200,'n'); P(75,178,sk);
+  ell(62,150,4.2,4.8,sk); P(64,149,'0'); rect(59,153,6,3,'O'); P(60,156,'O'); P(62,157,'O');
+  rect(58,145,9,2,'U'); rect(60,143,5,2,'Q'); P(66,144,'Q');
+  // the dog snapping at his heels (its jaw works, see drawDog)
+  egg(80,214,7,3.2,['N','n','t']); line(75,216,74,222,'n'); line(78,216,77,222,'n'); line(84,216,85,222,'n'); line(86,215,88,221,'n');
+  path([87,212, 89,209, 90,207],'n'); ell(74,210,2.6,2.2,'n'); P(73,209,'0');
+  speck(R,0,118,W,126,50,'yk9j');
+}
+
+/* ========================= moving things ========================== */
+// paradise: the rebel angels keep tumbling out of heaven, the serpent flicks its tongue
+var fallers=[]; for (var fi=0;fi<34;fi++) fallers.push({x:20+Math.random()*50, y:Math.random()*56+40, vx:(Math.random()-0.5)*0.3, sp:0.3+Math.random()*0.5, k:Math.random()*4|0});
+function updateFallers(){ for (var i=0;i<fallers.length;i++){ var f=fallers[i]; f.y+=f.sp; f.x+=f.vx+Math.sin((tick+i*7)*0.15)*0.4; if (f.y>96){ f.y=40; f.x=26+Math.random()*40; } } }
+function drawFallers(){
+  for (var i=0;i<fallers.length;i++){
+    var f=fallers[i], x=Math.round(PL.x+f.x), y=Math.round(PL.y+f.y), up=((tick>>1)+f.k)&1;
+    if (f.x<1||f.x>PL.iw-2) continue;
+    dp(x,y,K['2']); dp(x-1,y-up,K['3']); dp(x+1,y-up,K['3']); dp(x,y+1,K['1']);
+  }
+  if ((tick%40)<6){ dp(PL.x+53,PL.y+136,K.r); dp(PL.x+54,PL.y+137,K.r); }
+  if ((tick%70)<3) dglyph((PL.y+204)>>1, PL.x+49, '☼', K['9']);
+}
+// the haywain: the wheels turn, the devils pull, people climb the ladders, christ's glory
+// shimmers, the musicians play and wisps of hay drift down
+function drawWheels(){
+  for (var w=0;w<WHEELS.length;w++){
+    var wh=WHEELS[w], cx=PC.x+wh[0], cy=PC.y+wh[1], r=wh[2]-1.5;
+    for (var s=0;s<4;s++){ var a=s*Math.PI/4+tick*0.04; dline(cx-Math.cos(a)*r, cy-Math.sin(a)*r, cx+Math.cos(a)*r, cy+Math.sin(a)*r, K.n); }
+    dp(cx,cy,K.t);
+  }
+}
+function pullerSpr(kind,fr){
+  return mkSpr(18,20,function(){
+    var body={fish:['x','w'], rat:['4','5'], tree:['N','n'], stag:['n','t']}[kind];
+    if (kind==='tree'){ line(6,19,8,13,'N'); line(10,19,9,13,'N'); if (fr){ P(5,19,'N'); P(11,19,'N'); } else { P(7,19,'N'); P(10,18,'N'); } }
+    else if (fr){ line(7,13,5,19,body[0]); line(9,13,11,19,body[1]); } else { line(7,13,7,19,body[0]); line(9,13,9,19,body[1]); }
+    limb(7,7,8,13,2,body[0]); line(9,8,9,12,body[1]);
+    limb(9,8,14,6,0.8,body[1]); P(15,6,'f');
+    if (kind==='fish'){ egg(11,4,4,2.2,['x','w','W']); P(14,3,'0'); P(15,5,'R'); poly([7,4, 5,1, 5,7],'w'); }
+    else if (kind==='rat'){ egg(11,4,3.4,2,['4','5','6']); P(14,5,'k'); P(12,3,'0'); P(10,1,'k'); P(11,1,'k'); path([6,12, 3,14, 2,17],'k'); }
+    else if (kind==='tree'){ ball(10,4,3,['D','d','g']); line(8,6,5,2,'N'); line(12,6,15,1,'N'); P(10,5,'y'); }
+    else { ball(11,4,2.2,['n','t']); P(13,4,'0'); path([10,2, 9,0, 8,0],'N'); path([12,2, 13,0, 15,0],'N'); P(14,5,'N'); }
+  });
+}
+var PULLERS=[['fish',164,188],['rat',174,196],['tree',164,198],['stag',176,187]].map(function(p,i){ return { x:p[1], y:p[2], k:i, spr:[pullerSpr(p[0],0),pullerSpr(p[0],1)] }; });
+function drawPullers(){
+  var list=PULLERS.slice().sort(function(a,b){ return a.y-b.y; });
+  for (var i=0;i<list.length;i++){ var p=list[i], fr=((tick>>2)+p.k)&1, sp=p.spr[fr]; dspr(sp, PC.x+p.x-9, PC.y+p.y-19-fr, false); }
+}
+var CLIMB_COL=['r','B','o','g','e','P'];
+var climbers=[{l:0,o:0,c:0},{l:0,o:0.55,c:1},{l:1,o:0.2,c:2},{l:1,o:0.75,c:3}];
+var CLIMBER=CLIMB_COL.map(function(c){ return [0,1].map(function(pose){ return mkSpr(6,12,function(){ robed(1,11,1,{c:c,d:'N',pose:pose}); }); }); });
+function drawClimbers(){
+  for (var i=0;i<climbers.length;i++){
+    var c=climbers[i], L=LADDERS[c.l], t=((tick*0.0035+c.o)%1)*1.25; if (t>1) continue;
+    var x=L[0]+(L[2]-L[0])*t+1, y=L[1]+(L[3]-L[1])*t;
+    dspr(CLIMBER[c.c][(tick>>2)&1], PC.x+x-2, PC.y+y-11, false);
+  }
+}
+var wisps=[];
+function updateWisps(){
+  if (Math.random()<0.4){ var side=Math.random()<0.5?-1:1; wisps.push({x:HAY.x+side*(HAY.rx*0.6+Math.random()*HAY.rx*0.35), y:HAY.y-10+Math.random()*40, vx:side*0.15, life:0}); }
+  for (var i=wisps.length-1;i>=0;i--){ var w=wisps[i]; w.x+=w.vx+Math.sin((w.life+i)*0.3)*0.2; w.y+=0.35; if (++w.life>70||w.y>200) wisps.splice(i,1); }
+}
+function drawWisps(){ for (var i=0;i<wisps.length;i++){ var w=wisps[i]; dp(PC.x+w.x,PC.y+w.y,i&1?K.s:K.S); dp(PC.x+w.x+1,PC.y+w.y+(i&1),K.S); } }
+function drawGlory(){
+  for (var i=0;i<16;i++){
+    var a=i/16*6.283+tick*0.015, r=18+Math.sin(tick*0.1+i)*1.2;
+    var x=Math.round(PC.x+90+Math.cos(a)*r), y=Math.round(PC.y+26+Math.sin(a)*r*0.8);
+    if ((i+(tick>>2))%3===0) dglyph(y>>1, x, (i&1)?'·':'*', (i&1)?K.s:K.y);
+  }
+}
+var birdsC=[{x:20,y:60,v:0.3},{x:140,y:52,v:-0.25},{x:60,y:70,v:0.2}];
+function drawBirdsC(){ for (var i=0;i<birdsC.length;i++){ var b=birdsC[i], x=((b.x+tick*b.v)%200+200)%200-10; if (x<1||x>PC.iw-2) continue; dglyph((PC.y+b.y+Math.round(2*Math.sin(tick*0.05+i)))>>1, PC.x+Math.round(x), (tick>>2)&1?'v':'^', K['2']); } }
+var lute=makeNotes(PC,[[98,68],[104,68]],16), pipe=makeNotes(PC,[[103,66]],24,[K.l,K.B,K.x]);
+// hell: fire over the city and in the pits, smoke, and the devils building their tower
+var hellFire=makeFire(PR,[[8,76,1.3],[22,76,1.1],[40,75,1.4],[60,76,1.1],[80,76,1.3],[10,199,0.7],[72,159,0.7],[40,227,0.7],[80,213,0.6]],5);
+var hellSmoke=makeSmoke(PR,[[46,40],[20,58],[70,60]],0.5,0.12);
+var BRICK=mkSpr(8,12,function(){ demon(2,11,1,{c:'i',d:'I',kind:'horn'}); rect(4,2,3,2,'R'); });
+var MASON=[0,1].map(function(fr){ return mkSpr(10,14,function(){ demon(3,13,1,{c:'i',d:'I',kind:'horn'}); if (fr){ line(5,6,8,2,'I'); rect(7,0,3,2,'5'); } else { line(5,6,8,7,'I'); rect(8,6,2,2,'5'); } }); });
+function drawBuilders(){
+  for (var i=0;i<3;i++){
+    var t=((tick*0.004+i/3)%1), x=18+(30-18)*t, y=152+(58-152)*t;
+    dspr(BRICK, PR.x+x-1, PR.y+y-11, false);
+  }
+  var fr=(tick>>2)&1;
+  dspr(MASON[fr], PR.x+TOWER.x-4, PR.y+TOWER.top-15, false);
+  if (!fr && (tick&4)) dglyph((PR.y+TOWER.top-9)>>1, PR.x+TOWER.x+5, '*', K.y);
+}
+// shut: the dog snaps, the dancers hop, crows circle the gallows
+function drawClosedH(){
+  var ox=PC.c0, oy=TOP*2, open=(tick>>2)&1;
+  if (open){ dp(ox+71,oy+211,K.R); dp(ox+72,oy+212,K['9']); dp(ox+71,oy+212,K.n); }
+  var hop=(tick>>3)&1;
+  var dancers=[[124,152,'r'],[132,153,'B'],[140,152,'o']];
+  for (var d=0;d<dancers.length;d++){ var D=dancers[d], y=oy+D[1]-((hop+d)&1); for (var j=0;j<7;j++){ dp(ox+D[0],y-j,K[D[2]]); dp(ox+D[0]+1,y-j,K[D[2]]); } dp(ox+D[0],y-8,K.f); dp(ox+D[0]+1,y-8,K.f); dp(ox+D[0],y-9,K.h); dp(ox+D[0]+1,y-9,K.h); dp(ox+D[0]+((hop+d)&1?-1:2),y-9,K.f); }
+  for (var c=0;c<3;c++){ var a=tick*0.04+c*2.1, x=Math.round(ox+160+Math.cos(a)*16), y=Math.round(oy+74+Math.sin(a)*5); dglyph(y>>1, x, (tick>>2)&1?'v':'^', K['1']); }
+}
+
+/* ============================== start ============================= */
+triptychStart({
+  id:1,
+  paint:{ L:paintEden, C:paintWagon, R:paintHellH, doors:paintWayfarer },
+  byline:['hiERONYMUS bOSCH', 'tRiPTYCH, oiL oN oAK, c.1510-1516', 'mUSEO dEL pRADO, mADRiD'],
+  labels:{ L:'pARADiSE', C:'tHE hAYWAiN', R:'hELL', closed:'tHE wAYFARER' },
+  scroll:[ 'lEFT: tHE rEBEL aNGELS fALL, eVE iS mADE, tHE sERPENT, tHE eXPULSiON',
+           'cENTRE: tHE wHOLE wORLD gRABS aT tHE hAY wHiLE dEMONS dRAG tHE wAGON tO hELL',
+           'oN tOP oF tHE hAY: lOVERS, aN aNGEL pRAYiNG aND a dEViL pLAYiNG; aBOVE, cHRiST iN tHE cLOUDS',
+           'bEHiND tHE wAGON rIDE tHE pOPE aND tHE eMPEROR', 'rIGHT: hELL, wHERE dEViLS bUiLD a tOWER',
+           'cLOSED: tHE wAYFARER oN tHE pATH oF lIFE', 'aLL fLESH iS gRASS (iSAiAH 40:6)' ],
+  glitter:{ L:12 },
+  step:function(){ updateFallers(); updateWisps(); lute.step(); pipe.step(); hellFire.step(); hellSmoke.step(); },
+  draw:{
+    C:function(){ drawBirdsC(); drawGlory(); drawWheels(); drawClimbers(); drawPullers(); drawWisps(); lute.draw(); pipe.draw(); },
+    L:function(){ drawFallers(); },
+    R:function(){ hellSmoke.draw(); drawBuilders(); hellFire.draw(); },
+    closed:drawClosedH
+  }
+});
+})();
+</script>
+</body>
+</html>

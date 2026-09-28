@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="empdata2k - Hieronymus Bosch, The Temptation of St Anthony: an animated text mode triptych you fly over with the mouse.">
+<title>empdata2k - tHE tEMPTATiON oF sT aNTHONY</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000;color:#aaa;overscroll-behavior:none}
+body{font-family:Consolas,"Lucida Console","Courier New",monospace}
+#scr{position:fixed;left:0;top:0;display:block;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#crt{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 3px)}
+a.hud{position:fixed;display:block;overflow:hidden;white-space:nowrap;text-indent:200%;color:transparent;outline:none;cursor:pointer}
+noscript pre{color:#c0c0c0;font-size:12px;line-height:1.3;margin:40px auto;width:max-content}
+noscript pre a{color:#55ffff}
+</style>
+</head>
+<body>
+<canvas id="scr"></canvas>
+<div id="crt"></div>
+<a class="hud" id="back" href="./">back to empdata2k</a>
+<a class="hud" id="wings" href="#wings">open or close the wings</a>
+<noscript><pre>
+   hiERONYMUS bOSCH - tHE tEMPTATiON oF sT aNTHONY
+
+   (tURN oN jAVASCRiPT tO fLY oVER tHE tRiPTYCH)
+
+   <a href="garden.html">tHE gARDEN oF eARTHLY dELiGHTS</a> · <a href="haywain.html">tHE hAYWAiN</a>
+   <a href="./">« bACK tO empdata2k</a>
+</pre></noscript>
+<script src="triptych.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/*  eMPDATA2K  ·  tHE tEMPTATiON oF sT aNTHONY                          */
+/*  the paintings and the moving things; the engine is in triptych.js   */
+/* ------------------------------------------------------------------ */
+
+triptychWorld({ wing:106, title:'temptation of saint anthony' });   // 456x144 cells
+
+// the saint: a dark habit with the blue tau cross, bald, white bearded, about 16 px
+function saint(x,y,dir,o){
+  o=o||{}; var f=dir>0?1:-1;
+  if (o.kneel){ poly([x-4,y-12, x+4,y-12, x+7,y, x-6,y], function(px){ return (px-x)%3===0 ? '1' : '2'; }); rect(x-7,y-1,14,1,'1'); }
+  else if (o.sit){ poly([x-4,y-14, x+4,y-14, x+5,y-6, x+9,y-5, x+9,y, x-6,y], function(px){ return (px-x)%3===0 ? '1' : '2'; }); }
+  else poly([x-3,y-15, x+3,y-15, x+5,y, x-5,y], function(px){ return (px-x)%3===0 ? '1' : '2'; });
+  var hy = o.kneel ? y-15 : o.sit ? y-17 : y-18;
+  P(x-f*2,hy+6,'B'); P(x-f*2,hy+7,'B'); P(x-f*3,hy+6,'B'); P(x-f,hy+6,'B');       // the tau on his cloak
+  ell(x,hy,2.4,2.8,'f'); P(x,hy-2,'F'); rect(x-1,hy+2,3,3,'8'); P(x,hy+5,'8');       // bald head, white beard
+  P(x+f,hy-1,'2');
+  if (o.bless){ limb(x+f*3,hy+5,x+f*6,hy+1,0.9,'2'); P(x+f*6,hy-1,'f'); P(x+f*7,hy,'f'); }
+  if (o.book){ rect(f>0?x+1:x-5,hy+8,5,2,'s'); line(f>0?x+1:x-5,hy+8,f>0?x+5:x-1,hy+8,'9'); }
+}
+// grisaille figures for the shut wings: soldiers in armour about 20 px tall, feet at y.
+// o.arm: 'halberd' (default), 'torch', 'grab' (reaching forward), o.shield
+function trooper(x,y,dir,o){
+  o=o||{}; var f=dir>0?1:-1;
+  limb(x-1,y,x-1,y-7,0.9,'J'); limb(x+2,y,x+2,y-7,0.9,'U'); rect(x-3,y,3,1,'#'); rect(x+1,y,3,1,'#');
+  rect(x-2,y-8,6,2,'Q'); line(x-2,y-7,x+3,y-7,'U');
+  egg(x+0.5,y-12,3.4,4.4,['J','U','Q','O','L']); rect(x-2,y-9,6,1,'J');
+  ell(x+0.5,y-17,2,2.2,'Q'); P(x+0.5+f,y-17,'J');
+  ell(x+0.5,y-19,3,1.6,['J','U','O','L'][2]); line(x-3,y-18,x+4,y-18,'L'); P(x+0.5,y-21,'O');
+  var hx=x+f*5;
+  if (o.arm==='torch'){ limb(x+f*3,y-13,hx,y-17,0.8,'Q'); line(hx,y-16,hx+f,y-23,'U'); ell(hx+f,y-25,1.7,2.3,'L'); P(hx+f,y-26,'9'); }
+  else if (o.arm==='grab'){ limb(x+f*3,y-13,x+f*8,y-14,0.8,'Q'); P(x+f*9,y-14,'O'); }
+  else { limb(x+f*3,y-13,hx,y-11,0.8,'Q'); line(hx,y+1,hx+f,y-27,'U'); poly([hx+f,y-27, hx+f*5,y-25, hx+f*4,y-22, hx+f,y-23],'L'); P(hx+f,y-29,'O'); }
+  if (o.shield){ egg(x-f*3,y-12,2.6,3.6,['J','U','Q','O']); P(x-f*3,y-12,'L'); }
+}
+function torchFlame(x,dir,y){ return [x+(dir>0?6:-6), y-25]; }
+
+/* ====================== THE FLIGHT AND THE FALL ===================== */
+var ICE={y0:184, y1:214};
+function paintFlight(){
+  var R=RNG(51), W=PL.iw;
+  panel(PL.x,PL.y,PL.iw,PL.ih);
+  rect(0,0,W,112, vg(['e','c','b','a'],0,106));
+  for (var x=0;x<W;x++){ var top=Math.round(94+3*Math.sin(x*0.1)+2*Math.sin(x*0.27)); for (var y=top;y<112;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/10)); }
+  for (var tw=0;tw<4;tw++) { rect(6+tw*7,88-(tw%2)*4,3,10+(tw%2)*4,'M'); P(7+tw*7,87-(tw%2)*4,'M'); }
+  var land=function(x,y){ var n=fbm((x+OX)*0.07,(y+OY)*0.1); return rampInk(['N','n','d','g','G'], 0.5+0.6*(n-0.5)-0.12*(y-106)/130); };
+  for (x=0;x<W;x++){ var gt=Math.round(106+2*Math.sin(x*0.08)); for (y=gt;y<240;y++) P(x,y,land); P(x,gt,'G'); }
+  // the giant on all fours, seen from the side: his back is a grassy hill with a tavern on
+  // it, he kneels on one leg, leans on an arm, his head hangs low; people go in at his rear
+  var skin=function(x,y){ var yc=((OY+y)&~1)-OY; return rampInk(['F','f','k'], 0.45-(yc-128)*0.01+0.3*(fbm((x+OX)*0.2,(y+OY)*0.2)-0.5)); };
+  var body=[[40,140,40,160,5],[40,160,16,163,3.4],[86,140,90,162,4],[40,130,84,138,11],[84,140,93,148,4.5]];   // thigh, shin, arm, torso, neck
+  for (var bo=0;bo<body.length;bo++){ var B=body[bo]; limb(B[0],B[1],B[2],B[3],B[4]+1.1,'q'); }             // a dark outline first
+  ball(34,131,11,'q'); ell(13,163,4,3,'q');
+  for (bo=0;bo<body.length;bo++){ var B2=body[bo]; limb(B2[0],B2[1],B2[2],B2[3],B2[4],skin); }
+  ball(34,131,10,skin); line(40,121,40,129,'F');                                                           // his rump, where the door is
+  ell(13,163,3,2,'F'); for (var fg=0;fg<4;fg++) line(89+fg*1.5,163,91+fg*2,166,'F');                      // foot, fingers
+  line(46,148,82,149,'F'); line(36,146,40,150,'q');                                                        // belly and hip lines
+  ball(98,152,7,['q','F','f','k']); ell(96,146.5,6.5,3,'N'); P(101,151,'2'); P(103,153,'q'); P(104,155,'F');   // the hanging head
+  rect(97,157,6,2,'N'); P(99,159,'N');                                                                      // beard
+  for (var hx=30;hx<=94;hx++){                                                                              // grass and earth on his back
+    var t=(hx-40)/44, ty=Math.round(119+t*8-3*Math.sin((hx-30)*0.25)*0.3);
+    if (hx<32||hx>92) continue;
+    for (var hy=ty-2; hy<ty+2+(hash(hx,3)*3|0); hy++) P(hx,hy, hash(hx,hy)<0.3?'D':hash(hx,hy)<0.7?'d':'g');
+  }
+  poly([56,120, 68,120, 68,112, 56,112],'s'); poly([54,113, 62,106, 70,113],'R'); rect(60,115,3,5,'N'); rect(65,114,2,2,'x'); line(66,108,66,103,'4'); P(66,102,'I');
+  limb(76,122,77,112,0.8,'N'); ball(77,109,4,['D','d','g']);
+  ell(31,132,3,6,'u'); P(31,129,'Y'); P(32,131,'y'); line(27,122,27,130,'N'); rect(24,121,4,2,'r');           // the door in his rear, a sign
+  nude(26,146,3,1,'f','h'); nude(21,148,0,1,'f','H');
+  // the frozen brook, the bridge they carry anthony over
+  rect(0,ICE.y0,W,ICE.y1-ICE.y0, function(x,y){ return rampInk(['A','E','C'], 0.3+0.6*fbm((x+OX)*0.06,(y+OY)*0.2)); });
+  for (var c=0;c<7;c++){ var cx=5+Math.floor(R()*95), cy=ICE.y0+3+Math.floor(R()*24); path([cx,cy, cx+3,cy+1, cx+6,cy-1],'A'); }
+  poly([6,178, 88,178, 88,182, 70,182, 47,176, 24,182, 6,182],'n'); line(6,178,88,178,'t'); line(8,172,86,172,'N'); for (var rp=10;rp<88;rp+=8) line(rp,172,rp,178,'N');
+  robed(34,177,-1,{c:'2',d:'1',hat:'hood',hc:'2',pose:3}); saint(44,178,-1,{}); robed(52,177,-1,{c:'2',d:'1',hat:'hood',hc:'2',pose:3}); robed(60,177,-1,{c:'r',d:'R',hat:'hat',hc:'2',pose:3});
+  // under the bridge on the ice: a devil reads a letter, another fishes
+  demon(30,200,1,{c:'i',d:'I',kind:'horn'}); rect(34,193,3,3,'9'); P(35,194,'2');
+  demon(70,208,-1,{c:'N',d:'n',kind:'rat'}); line(66,200,60,212,'N');
+  // the bank below, reeds
+  for (var rd=0;rd<30;rd++){ var rx=Math.floor(R()*W), ry=218+Math.floor(R()*20); line(rx,ry,rx+(R()<0.5?-1:1),ry-4,'d'); }
+  speck(R,0,110,W,70,40,'yk9');
+}
+
+/* ========================= THE TEMPTATION ========================= */
+var CHAPEL={x0:142, x1:204, top:62, base:188};
+function paintTemptation(){
+  var R=RNG(52), W=PC.iw;
+  panel(PC.x,PC.y,PC.iw,PC.ih);
+  // the sky: a burning village throws fire and smoke into it on the left, calm on the right
+  rect(0,0,W,108, function(x,y){
+    var yc=((OY+y)&~1)-OY+0.5, fire=1-Math.hypot((x-44)/78,(yc-96)/52)+0.35*(fbm((x+OX)*0.08,yc*0.06)-0.5), smoke=(1-x/150)*(1-yc/104)+0.25*(fbm((x+OX)*0.05,yc*0.05)-0.5);
+    if (fire>0.1) return rampInk(['V','X','R','Z','Y','y'], fire*1.2);
+    if (smoke>0.12) return rampInk(['v','V','i','I','M','m'], 1-smoke*1.5);
+    return rampInk(['e','c','b','a'], yc/100);
+  });
+  for (var b=0;b<16;b++){
+    var bx=Math.floor(R()*96), bw=4+Math.floor(R()*8), bh=6+Math.floor(R()*12);
+    rect(bx,100-bh,bw,bh,'0'); if (R()<0.6) poly([bx-0.5,100-bh, bx+bw-0.5,100-bh, bx+bw/2-0.5,100-bh-4-R()*5],'0');
+    for (var wn=0;wn<bw*bh/12;wn++) P(bx+1+Math.floor(R()*(bw-2)), 100-bh+2+Math.floor(R()*(bh-3)), R()<0.6?'Y':'y');
+  }
+  rect(60,72,4,28,'0'); poly([59.5,72, 64.5,72, 62,62],'0'); P(61,78,'Y');
+  // the river, the town and the hills on the right
+  for (var x=96;x<W;x++){ var top=Math.round(86+3*Math.sin(x*0.09)+2*Math.sin(x*0.23)); for (var y=top;y<100;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/10)); }
+  for (var tw=0;tw<6;tw++){ var tx=110+tw*9; rect(tx,82-(tw%3)*3,4,12+(tw%3)*3,'M'); poly([tx-0.5,82-(tw%3)*3, tx+3.5,82-(tw%3)*3, tx+1.5,77-(tw%3)*3],'M'); }
+  rect(96,98,120,6, vg(['W','w'],98,104));
+  // the ground
+  var earth=function(x,y){ var n=fbm((x+OX)*0.06,(y+OY)*0.09); return rampInk(['u','N','n','t','d','g'], 0.45+0.6*(n-0.5)+0.15*(x/W)); };
+  for (x=0;x<W;x++){ var gt=Math.round(102+2*Math.sin(x*0.07)); for (y=gt;y<196;y++) P(x,y,earth); }
+  // the plain between the fire and the chapel: a pond that mirrors the flames, bushes, a
+  // broken wall, a gibbet, and all sorts of pilgrims and devils on their way to the mass
+  ell(40,128,26,7, function(x,y){ return rampInk(['X','R','x','w'], 0.2+0.6*fbm((x+OX)*0.1,(y+OY)*0.4)); }); ring(40,128,26,0.4,'N');
+  egg(34,126,7,2.4,['N','n','t']); demon(33,125,1,{c:'i',d:'I',kind:'bird'}); line(40,124,46,118,'n');
+  var bushes=[[8,112,4],[82,114,5],[96,122,3],[124,112,4],[112,138,3],[6,150,4],[128,160,3]];
+  for (var bu=0;bu<bushes.length;bu++) ball(bushes[bu][0],bushes[bu][1],bushes[bu][2],['D','d','g']);
+  poly([88,150, 110,150, 110,138, 104,134, 100,140, 94,136, 88,142],'Q'); for (var wb=0;wb<5;wb++) line(89+wb*4,141+(wb&1),89+wb*4,150,'U');
+  rect(72,112,2,26,'N'); rect(72,112,10,2,'N'); line(80,114,80,120,'t'); rect(79,120,2,4,'F');
+  lier(58,150,1,'f','h'); ell(66,158,4,2,'u');
+  for (var pg=0;pg<22;pg++){
+    var gx=4+Math.floor(R()*128), gy=108+Math.floor(R()*62);
+    if (Math.abs(gx-40)<28 && Math.abs(gy-128)<9) continue;
+    var roll=R();
+    if (roll<0.45) robed(gx,gy,R()<0.5?1:-1,{c:['n','2','r','B','t','P'][Math.floor(R()*6)],d:'N',hat:R()<0.4?'hood':R()<0.3?'hat':null,hc:'N',pose:R()<0.5?2:0});
+    else if (roll<0.8) demon(gx,gy,R()<0.5?1:-1,{c:R()<0.5?'i':'N',d:'I',kind:['horn','bird','rat','fish'][Math.floor(R()*4)],wings:R()<0.3});
+    else nude(gx,gy,Math.floor(R()*3),R()<0.5?1:-1,'f','h');
+  }
+  // the dark water in front
+  rect(0,194,W,46, function(x,y){ var yc=((OY+y)&~1)-OY; return rampInk(['v','x','w'], 0.25+0.35*fbm((x+OX)*0.05,(y+OY)*0.3)+(yc-194)*0.004); });
+  for (var ri=0;ri<30;ri++){ rect(Math.floor(R()*210),198+Math.floor(R()*40),2+Math.floor(R()*5),1,'w'); }
+  for (var fr=0;fr<W;fr++) P(fr,194+Math.round(Math.sin(fr*0.3)),'n');
+  // the ruined chapel, its walls carved with stories, a crucifix inside
+  var stone=function(x,y){ return rampInk(['J','U','Q','O','L'], 0.3+0.45*fbm((x+OX)*0.2,(y+OY)*0.2)+0.25*(CHAPEL.x1-x)/(CHAPEL.x1-CHAPEL.x0)-0.35); };
+  poly([CHAPEL.x0,CHAPEL.base, CHAPEL.x0,96, 146,86, 150,92, 156,70, 160,76, 166,CHAPEL.top, 172,70, 178,66, 184,80, 190,74, 196,90, 204,88, CHAPEL.x1,CHAPEL.base], stone);
+  for (var bnd=0;bnd<3;bnd++){ var by=110+bnd*20; line(CHAPEL.x0,by,CHAPEL.x1,by,'J'); for (var fg=CHAPEL.x0+3;fg<CHAPEL.x1-2;fg+=5){ P(fg,by+3,'U'); P(fg,by+4,'U'); P(fg+1,by+4,'U'); P(fg,by+2,'Q'); } }
+  poly([166,CHAPEL.base, 166,150, 174,140, 182,150, 182,CHAPEL.base],'0');
+  rect(173,152,2,16,'S'); rect(170,156,8,2,'S'); P(173,155,'f'); P(174,155,'f'); rect(173,157,2,5,'f');
+  robed(177,186,-1,{c:'9',d:'7',hair:'n',pose:3,sk:'f'});
+  for (var pl=0;pl<14;pl++){ var px=CHAPEL.x0+Math.floor(R()*62), py=64+Math.floor(R()*40); if (R()<0.5) P(px,py,'d'); }
+  ball(160,62,3,['D','d','g']); line(160,65,160,68,'N');
+  // saint anthony kneels before it, turning to us, blessing
+  saint(132,188,-1,{kneel:true,bless:true});
+  // the gathering: a lady with a bowl, a lord in a tall hat, a pig-snouted monk with a lute
+  // and an owl, a black servant bringing a toad on a plate, the tree-woman riding a rat
+  var items=[];
+  function add(y,fn){ items.push({y:y,fn:fn}); }
+  add(186,function(){ robed(112,186,-1,{c:'r',d:'R',hat:'tall',hc:'9',hair:'H',pose:3}); ball(108,179,1.6,['T','S','s']); });
+  add(188,function(){ robed(101,188,1,{c:'B',d:'x',hat:'tall',hc:'2',pose:0}); rect(99,181,1,6,'R'); });
+  add(190,function(){ robed(88,190,1,{c:'n',d:'N',hat:'hood',hc:'N',pose:3}); P(91,181,'p'); P(92,182,'p'); egg(93,185,2.4,1.8,['n','t']); line(94,184,98,182,'N'); ell(89,177,1.4,1.8,'n'); P(89,176,'y'); });
+  add(192,function(){ robed(120,192,-1,{c:'9',d:'7',sk:'q',hair:'1',hat:'turban',hc:'8',pose:3}); rect(114,185,4,1,'S'); P(115,184,'d'); P(116,184,'d'); });
+  add(191,function(){ egg(60,187,9,3.5,['4','5','6']); ell(69,186,3,2,'5'); P(71,186,'k'); P(69,185,'0'); path([51,187, 46,184, 43,186],'k'); line(56,190,55,194,'4'); line(64,190,65,194,'4');
+                       limb(60,184,60,172,2,'n'); line(59,184,59,172,'N'); line(60,172,56,166,'N'); line(60,172,65,165,'N'); P(55,165,'d'); P(66,164,'d');
+                       ell(60,169,2.2,2.6,'f'); ell(60,167,2.2,1.2,'H'); ball(63,176,1.6,['F','f']); });
+  add(193,function(){ egg(30,186,8,4,['n','t','s']); ell(38,183,2,1.6,'t'); rect(26,189,1,5,'n'); rect(33,189,1,5,'n'); rect(29,189,1,5,'t'); rect(36,189,1,5,'t'); robed(30,184,1,{c:'6',d:'5',hat:'helmet',pose:3}); });
+  add(185,function(){ demon(76,185,1,{c:'i',d:'I',kind:'bird',wings:true}); demon(126,176,-1,{c:'2',d:'3',kind:'horn'}); demon(44,176,1,{c:'N',d:'n',kind:'rat'}); });
+  add(180,function(){ robed(96,176,1,{c:'P',d:'R',hat:'hat',hc:'N',pose:1}); robed(72,176,1,{c:'g',d:'D',pose:3}); nude(82,176,1,1,'f','h'); });
+  items.sort(function(a,b){ return a.y-b.y; });
+  items.forEach(function(it){ it.fn(); });
+  // boats of the devil on the water: a hollow fish full of devils, a headless duck with a rider
+  egg(44,212,22,7,['x','w','W']); ell(40,208,10,2.5,'v'); P(64,210,'0'); P(66,213,'R'); poly([22,212, 14,204, 14,220],'w');
+  for (var fi=0;fi<4;fi++) demon(32+fi*6,208,1,{c:'i',d:'I',kind:fi&1?'bird':'horn'});
+  egg(178,220,12,5,['N','n','t']); line(190,218,196,212,'t'); robed(176,214,1,{c:'2',d:'1',hat:'helmet',pose:3});
+  speck(R,0,104,W,90,40,'yk9');
+}
+
+/* ===================== ST ANTHONY IN CONTEMPLATION ===================== */
+function paintContemplation(){
+  var R=RNG(53), W=PR.iw;
+  panel(PR.x,PR.y,PR.iw,PR.ih);
+  rect(0,0,W,108, vg(['e','c','b','a'],0,104));
+  for (var x=0;x<W;x++){ var top=Math.round(90+3*Math.sin(x*0.1+2)); for (var y=top;y<108;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/12)); }
+  for (var tw=0;tw<4;tw++){ rect(8+tw*9,84-(tw%2)*5,4,14+(tw%2)*5,'M'); poly([7.5+tw*9,84-(tw%2)*5, 11.5+tw*9,84-(tw%2)*5, 9.5+tw*9,78-(tw%2)*5],'M'); }
+  var land=function(x,y){ var n=fbm((x+OX)*0.07,(y+OY)*0.1); return rampInk(['N','n','d','g','G'], 0.55+0.6*(n-0.5)-0.1*(y-104)/130); };
+  for (x=0;x<W;x++){ var gt=Math.round(104+2*Math.sin(x*0.09)); for (y=gt;y<240;y++) P(x,y,land); P(x,gt,'G'); }
+  // the hollow dead tree, the naked queen of devils in it behind a red curtain
+  limb(80,176,78,60,9,function(x,y){ return rampInk(['N','n','t'], 0.25+0.5*fbm((x+OX)*0.3,(y+OY)*0.05)); });
+  limb(78,64,64,40,2,'N'); limb(79,62,96,36,2,'n'); line(66,44,58,34,'N'); line(92,40,100,30,'N'); line(80,60,82,40,'N');
+  ell(79,122,6.5,20,'u'); ell(79,124,5.5,18,'0');
+  bigNude(79,140,-1,{long:true,hair:'H',arm:'down'});
+  poly([72,102, 76,102, 78,144, 70,146], function(px,py){ return (px+py)%4===0 ? 'R' : 'r'; });
+  demon(64,146,1,{c:'d',d:'D',kind:'horn'}); line(67,140,72,132,'d');
+  // the saint sits reading; bread and wine on a table the devils set before him
+  saint(38,200,1,{sit:true,book:true});
+  rect(58,186,30,2,'9'); rect(58,188,30,1,'7'); ell(64,184,2.5,1.5,'t'); rect(72,180,3,6,'S'); P(73,179,'S'); ell(81,184,2,1.2,'r');
+  nude(66,198,0,1,'f','h'); rect(64,190,8,1,'F'); line(60,188,60,198,'n'); line(86,188,86,198,'n');
+  // little grotesques about
+  demon(94,206,-1,{c:'4',d:'5',kind:'bird'}); poly([91,196, 97,196, 94,191],'4');
+  demon(20,222,1,{c:'N',d:'n',kind:'rat'}); egg(50,226,5,3,['P','p','k']); P(55,225,'P'); rect(47,229,1,2,'P'); rect(52,229,1,2,'P');
+  demon(80,230,-1,{c:'i',d:'I',kind:'fish'});
+  speck(R,0,108,W,130,50,'yk9');
+}
+
+/* ===================== THE ARREST · THE WAY TO CALVARY ===================== */
+// shut: two scenes in grisaille, the soldiers take christ in the garden (left) and lead
+// him away with the cross (right)
+// the crowds are placed by hand, back to front; [x, feet y, dir, options]
+var ARREST=[
+  [16,146,1,{}], [30,142,1,{arm:'torch'}], [80,140,-1,{arm:'torch'}], [94,146,-1,{}],
+  [24,164,1,{shield:true}], [40,160,1,{}], [72,160,-1,{shield:true}], [88,166,-1,{}],
+  [45,180,1,{arm:'grab'}], [67,180,-1,{arm:'grab'}],
+  [12,194,1,{}], [98,196,-1,{arm:'torch'}]
+];
+var CALVARY=[
+  [14,140,1,{}], [34,136,1,{arm:'torch'}], [82,138,-1,{}], [100,144,-1,{arm:'torch'}],
+  [20,166,1,{shield:true}], [94,170,-1,{shield:true}],
+  [12,208,1,{}], [100,212,-1,{}]
+];
+function paintPassion(){
+  var R=RNG(54), W=DOORS.w, ox=W/2, i;
+  rect(0,0,W,DOORS.h, function(x,y){ return rampInk(['#','J','U','Q'], 0.22+0.3*fbm(x*0.04,y*0.04)+(y>130?0.18:0)); });
+  // left: the garden of gethsemane at night, the moon, dark trees, the soldiers seize christ
+  ball(26,28,6,['Q','O','L']);
+  for (var tr=0;tr<6;tr++) ball(8+tr*19,76+(tr%2)*6,9,['#','J','U']);
+  for (i=0;i<10;i++){ var g=ARREST[i]; trooper(g[0],g[1],g[2],g[3]); }
+  bigRobe(56,184,1,'O','Q',{sk:'L',hair:'Q',halo:'L'});
+  for (i=10;i<ARREST.length;i++){ var g2=ARREST[i]; trooper(g2[0],g2[1],g2[2],g2[3]); }
+  // below, peter swings his sword at malchus, who lies with his lantern
+  bigRobe(32,226,1,'Q','U',{sk:'O',hair:'L',halo:'O',sword:true});
+  limb(44,224,60,226,2,'U'); ell(42,223,2,2,'O'); rect(62,222,3,4,'L'); P(63,221,'O');
+  // right: a town on the hill, christ bowed under the cross, simon of cyrene helping,
+  // veronica showing the veil with his face
+  for (var h=0;h<4;h++) poly([ox+8+h*26,94, ox+21+h*26,72, ox+34+h*26,94],'J');
+  rect(ox+62,40,22,54,'U'); for (var t=0;t<4;t++) rect(ox+63+t*6,34,3,6,'U'); rect(ox+70,70,4,8,'#');
+  for (i=0;i<4;i++){ var c=CALVARY[i]; trooper(c[0]+ox,c[1],c[2],c[3]); }
+  limb(ox+18,150,ox+100,200,2.6,'Q'); line(ox+18,148,ox+100,198,'L'); limb(ox+64,156,ox+54,186,2.2,'Q');
+  bigRobe(ox+60,202,1,'O','Q',{sk:'L',hair:'Q',halo:'L'});
+  robed(ox+80,202,-1,{c:'Q',d:'U',sk:'O',hair:'U',pose:1});
+  for (i=4;i<CALVARY.length;i++){ var c2=CALVARY[i]; trooper(c2[0]+ox,c2[1],c2[2],c2[3]); }
+  robed(ox+34,226,1,{c:'O',d:'Q',sk:'L',hat:'hood',hc:'Q',pose:3}); rect(ox+38,214,7,6,'L'); ell(ox+41,217,1.5,1.8,'O'); P(ox+41,216,'J');
+  line(ox+28,190,ox+50,186,'O'); line(ox+82,184,ox+72,196,'O');
+}
+
+/* ========================= moving things ========================== */
+// left: devils carry the saint through the air and beat him; a bird skates on the ice
+var FLIGHT=[0,1].map(function(fr){ return mkSpr(34,20,function(){
+  egg(17,12,10,4.5,['N','n','t']); ell(26,11,4,3,'n'); P(28,10,'y'); P(29,12,'R');
+  if (fr){ poly([12,9, 6,1, 16,6],'2'); poly([20,9, 24,0, 26,7],'2'); } else { poly([12,10, 4,14, 14,12],'2'); poly([20,10, 28,16, 24,11],'2'); }
+  path([7,12, 3,10, 1,13],'n');
+  rect(12,5,9,3,'2'); ell(22,6,2,1.8,'f'); rect(22,7,2,1,'8'); P(14,5,'B');
+}); });
+var BATS=[0,1].map(function(fr){ return mkSpr(12,12,function(){ demon(4,10,1,{c:'i',d:'I',kind:'horn'}); if (fr) path([3,5, 0,1, 1,5],'I'); else path([3,5, 0,7, 2,8],'I'); line(6,4,9,0,'N'); }); });
+function drawFlight(){
+  var t=tick*0.012, cx=PL.x+50+Math.cos(t)*26, cy=PL.y+40+Math.sin(t*1.3)*14, fr=(tick>>2)&1;
+  dspr(FLIGHT[fr], cx-17, cy-10, Math.sin(t)>0);
+  for (var i=0;i<3;i++){ var a=tick*0.06+i*2.1; dspr(BATS[(fr+i)&1], cx-6+Math.cos(a)*20, cy-8+Math.sin(a)*10, Math.cos(a)>0); }
+}
+var SKATER=mkSpr(12,14,function(){ egg(6,7,3.4,3,['4','5','6']); ball(8,4,2,['4','5','6']); line(10,4,12,5,'S'); poly([6,2, 10,2, 8,-2],'5'); poly([5,3, 11,3, 8,0],'6'); rect(3,10,1,2,'S'); rect(8,10,1,2,'S'); line(1,12,11,12,'7'); rect(4,6,2,2,'9'); });
+var skate={x:10,v:0.4};
+function drawSkate(){ skate.x+=skate.v; if (skate.x>90||skate.x<4) skate.v=-skate.v; dspr(SKATER, PL.x+skate.x, PL.y+ICE.y0+10, skate.v<0); }
+// centre: the village burns, smoke rolls, a devil ship sails the sky, the fish boat rocks
+var villageFire=makeFire(PC,[[10,98,1.3],[26,97,1.5],[42,98,1.3],[58,96,1.6],[74,98,1.2],[88,99,1.1],[62,70,0.9]],6);
+var villageSmoke=makeSmoke(PC,[[20,80],[40,78],[60,62],[80,84]],0.7,0.2);
+var SHIP=[0,1].map(function(fr){ return mkSpr(30,20,function(){ egg(14,14,11,3.5,['x','w','W']); P(24,13,'0'); P(26,15,'R'); poly([3,14, -1,10, -1,18],'w'); line(14,11,14,1,'N'); poly([15,2, 15,10, 22,9],fr?'9':'8'); demon(8,12,1,{c:'i',d:'I',kind:'bird'}); }); });
+function drawShip(){ var span=PC.iw+40, x=((tick*0.3)%span)-30, y=20+Math.round(4*Math.sin(tick*0.04)); var sp=SHIP[(tick>>3)&1]; for (var q=0;q<sp.p.length;q+=3){ var px=x+sp.p[q]; if (px<0||px>=PC.iw) continue; dp(PC.x+px, PC.y+y+sp.p[q+1], sp.p[q+2]); } }
+var lute=makeNotes(PC,[[96,180]],18);
+var ripples=[]; for (var rq=0;rq<18;rq++) ripples.push({x:4+Math.random()*206, y:200+Math.random()*36, ph:Math.random()*6});
+function drawWater(){
+  for (var i=0;i<ripples.length;i++){ var r=ripples[i], b=Math.sin(tick*0.08+r.ph); if (b<0.4) continue; dglyph((PC.y+r.y)>>1, PC.x+Math.round(r.x+b*2), '~', b>0.8?K.W:K.w); }
+  var bob=(tick>>4)&1; dp(PC.x+36,PC.y+206-bob,K.I); dp(PC.x+48,PC.y+206-(1-bob),K.I);
+}
+// right: a fish flies over, little devils carry food to the table
+var FISH=[0,1].map(function(fr){ return mkSpr(26,12,function(){ egg(12,6,9,3,['x','w','W']); P(19,5,'0'); P(21,7,'R'); poly([4,6, 0,2, 0,10],'w'); if (fr) poly([10,4, 14,0, 16,4],'W'); else poly([10,7, 14,11, 16,7],'W'); demon(9,5,1,{c:'i',d:'I',kind:'horn'}); }); });
+function drawFishFly(){ var span=PR.iw+30, x=span-((tick*0.35)%span)-24, y=24+Math.round(5*Math.sin(tick*0.05)); var sp=FISH[(tick>>3)&1]; for (var q=0;q<sp.p.length;q+=3){ var px=x+(sp.w-1-sp.p[q]); if (px<0||px>=PR.iw) continue; dp(PR.x+px, PR.y+y+sp.p[q+1], sp.p[q+2]); } }
+var WAITER=[0,1].map(function(fr){ return mkSpr(8,14,function(){ demon(2,13,1,{c:'i',d:'I',kind:fr?'bird':'horn'}); rect(3,1,3,2,'t'); line(4,3,4,5,'I'); }); });
+function drawWaiters(){
+  for (var i=0;i<2;i++){ var t=((tick*0.006+i*0.5)%1), x=100-t*28, y=214-t*14; dspr(WAITER[((tick>>2)+i)&1], PR.x+x, PR.y+y-13, true); }
+}
+// shut: the torches flicker
+function drawClosedA(){
+  var ox=PC.c0, oy=TOP*2, list=[];
+  ARREST.forEach(function(g){ if (g[3].arm==='torch') list.push(torchFlame(g[0],g[2],g[1])); });
+  CALVARY.forEach(function(g){ if (g[3].arm==='torch'){ var fl=torchFlame(g[0],g[2],g[1]); list.push([fl[0]+DOORS.w/2,fl[1]]); } });
+  for (var i=0;i<list.length;i++){ var fl=Math.random(); dglyph((oy+list[i][1]-(fl<0.5?2:1))>>1, ox+list[i][0], fl<0.3?'▓':fl<0.7?'▒':'░', fl<0.5?K['9']:K.L); }
+}
+
+/* ============================== start ============================= */
+triptychStart({
+  id:2,
+  paint:{ L:paintFlight, C:paintTemptation, R:paintContemplation, doors:paintPassion },
+  byline:['hiERONYMUS bOSCH', 'tRiPTYCH, oiL oN oAK, c.1500', 'mUSEU nACiONAL dE aRTE aNTiGA, lISBOA'],
+  labels:{ L:'tHE fLiGHT aND tHE fALL', C:'tHE tEMPTATiON', R:'iN cONTEMPLATiON', closed:'tHE aRREST · tHE wAY tO cALVARY' },
+  scroll:[ 'lEFT: dEViLS cARRY aNTHONY tHROUGH tHE aiR, hiS bROTHERS hELP hiM oVER tHE bRiDGE',
+           'cENTRE: tHE sAiNT kNEELS aT tHE rUiNED cHAPEL wHiLE a vILLAGE bURNS aND dEViLS hOLD tHEiR mASS',
+           'rIGHT: aNTHONY rEADS, uNMOVED bY tHE fEAST aND tHE qUEEN iN tHE tREE',
+           'cLOSED, iN gRiSAiLLE: cHRiST iS tAKEN iN tHE gARDEN aND lED tO cALVARY',
+           'oiL oN oAK, c.1500, mUSEU nACiONAL dE aRTE aNTiGA, lISBOA' ],
+  glitter:{ C:30 },
+  step:function(){ villageFire.step(); villageSmoke.step(); lute.step(); },
+  draw:{
+    C:function(){ villageSmoke.draw(); villageFire.draw(); drawShip(); drawWater(); lute.draw(); },
+    L:function(){ drawFlight(); drawSkate(); },
+    R:function(){ drawFishFly(); drawWaiters(); },
+    closed:drawClosedA
+  }
+});
+})();
+</script>
+</body>
+</html>

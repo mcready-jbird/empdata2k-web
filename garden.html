@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="empdata2k - Hieronymus Bosch, The Garden of Earthly Delights: an animated text mode triptych you fly over with the mouse.">
+<title>empdata2k - tHE gARDEN oF eARTHLY dELiGHTS</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000;color:#aaa;overscroll-behavior:none}
+body{font-family:Consolas,"Lucida Console","Courier New",monospace}
+#scr{position:fixed;left:0;top:0;display:block;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#crt{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 3px)}
+a.hud{position:fixed;display:block;overflow:hidden;white-space:nowrap;text-indent:200%;color:transparent;outline:none;cursor:pointer}
+noscript pre{color:#c0c0c0;font-size:12px;line-height:1.3;margin:40px auto;width:max-content}
+noscript pre a{color:#55ffff}
+</style>
+</head>
+<body>
+<canvas id="scr"></canvas>
+<div id="crt"></div>
+<a class="hud" id="back" href="./">back to empdata2k</a>
+<a class="hud" id="wings" href="#wings">open or close the wings</a>
+<noscript><pre>
+   hiERONYMUS bOSCH - tHE gARDEN oF eARTHLY dELiGHTS
+
+   (tURN oN jAVASCRiPT tO fLY oVER tHE tRiPTYCH)
+
+   <a href="haywain.html">tHE hAYWAiN</a> · <a href="anthony.html">tHE tEMPTATiON oF sT aNTHONY</a>
+   <a href="./">« bACK tO empdata2k</a>
+</pre></noscript>
+<script src="triptych.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/*  eMPDATA2K  ·  tHE gARDEN oF eARTHLY dELiGHTS                        */
+/*  the paintings and the moving things; the engine is in triptych.js   */
+/* ------------------------------------------------------------------ */
+
+triptychWorld({ wing:110, title:'garden of earthly delights' });   // 472x144 cells
+
+/* ============================ PARADISE ============================ */
+function paintParadise(){
+  var R=RNG(11);
+  panel(PL.x,PL.y,PL.iw,PL.ih);
+  // sky, far hills and the lake
+  rect(0,0,110,80, vg(['e','c','b','a'],0,74));
+  for (var x=0;x<110;x++){
+    var top=Math.round(66+3*Math.sin(x*0.11+0.5)+2*Math.sin(x*0.29+2));
+    for (var y=top;y<80;y++) P(x,y, y===top ? 'a' : rampInk(['m','M'],(y-top)/12));
+  }
+  rect(0,76,110,56, vg(['W','w'],76,130));
+  for (var z=0;z<16;z++){ var zx=Math.floor(R()*104), zy=80+Math.floor(R()*44); rect(zx,zy,3+Math.floor(R()*5),1,'W'); }
+  // rocks: left cliff with an arch, right spire with the hole the birds fly out of
+  var rock = function(x,y){ return rampInk(['M','m','b','a'], 0.18+0.62*fbm((x+OX)*0.13,(y+OY)*0.07)); };
+  var pinkRock = function(x,y){ var n=fbm((x+OX)*0.09,(y+OY)*0.06), m=fbm((x+OX)*0.3+5,(y+OY)*0.12); return rampInk(['M','m','p','k'], 0.1+0.75*n+(m<0.3?-0.2:0)); };
+  poly([0,128, 0,40, 4,34, 8,42, 12,36, 16,48, 14,58, 21,66, 18,80, 25,92, 22,108, 29,128], rock);
+  ell(10,60,2.5,3.5,'x'); ell(16,84,2,3,'x');
+  ell(12,118,4,7, vg(['W','w'],76,130)); P(12,110,'M');
+  poly([110,128, 90,128, 86,118, 91,106, 87,94, 91,82, 88,70, 93,56, 90,44, 94,30, 97,16, 100,24, 102,34, 106,38, 110,36], pinkRock);
+  for (var cv=0;cv<5;cv++) path([96+cv*2,52+cv*15, 94+cv*2,60+cv*15, 97+cv*2,66+cv*15],'M');
+  line(97,16,99,7,'p'); P(99,6,'k');
+  ell(97,44,5,6,'P'); ell(97,44,4,5,'x'); ell(97,45,2,3,'M');
+  ell(102,80,3,2,'x'); ball(105,64,2,['D','d','g']); ball(93,102,1.6,['D','d']);
+  // far meadow shore and meadow
+  var shore=[];
+  for (x=0;x<110;x++) shore[x]=Math.round(126+2*Math.sin(x*0.09)+1.5*Math.sin(x*0.23+1));
+  var grass=function(x,y){ var n=fbm((x+OX)*0.07,(y+OY)*0.1); return rampInk(['D','d','g','G','j'], 0.64+0.6*(n-0.5)-0.16*(y-126)/114); };
+  for (x=0;x<110;x++){ for (y=shore[x];y<240;y++) P(x,y,grass); P(x,shore[x],'j'); }
+  // a stream from the lake, the unicorn drinks from it
+  for (var t=0;t<1;t+=0.02){ var sx=64+t*22+3*Math.sin(t*7), sy=126+t*16; ell(sx,sy,2,1.2,'w'); P(sx-1,sy-1,'W'); }
+  // trees round the lake
+  ball(30,122,4,['D','d','g']); rect(30,126,1,3,'N');
+  ball(74,122,3,['D','d','g']); ball(80,124,2.5,['D','d','G']);
+  ball(6,124,3.5,['D','d','g']);
+  // the fountain of life, pink, in the middle of the lake
+  ell(55,128,13,3,'d'); ell(55,127,11,2,'G');
+  poly([46,128, 64,128, 61,113, 49,113], hg(['k','p','p','P'],46,64));
+  ell(55,121,3.5,4,'u');
+  ell(55,122,2.2,2.2,'n'); P(54,121,'y'); P(56,121,'y'); P(53,119,'n'); P(57,119,'n'); P(55,123,'o');
+  rect(49,113,12,1,'P'); P(51,117,'P'); P(59,117,'P'); P(51,125,'k'); P(59,125,'P');
+  poly([51,113, 59,113, 57,88, 53,88], hg(['k','p','P'],51,59));
+  rect(52,101,6,1,'P'); P(54,106,'P'); P(56,106,'P'); P(55,95,'P'); P(53,109,'k');
+  ball(55,84,4,['P','p','k']);
+  var spikes=[[47,70],[50,62],[55,52],[60,62],[63,70],[44,78],[66,78]];
+  for (var s=0;s<spikes.length;s++){
+    var tx=spikes[s][0], ty=spikes[s][1];
+    line(55,82,tx,ty,'p'); line(55+(tx>55?1:tx<55?-1:0),82,tx,ty+1,'P');
+    ball(tx,ty,1.3,['P','p','k']);
+    if (s<5) P((55+tx)/2+(tx<55?-1:1),(82+ty)/2,'d');
+  }
+  P(55,50,'S'); P(54,49,'S'); P(56,49,'S');
+  // giraffe and elephant with a monkey
+  line(17,138,17,146,'6'); line(19,138,19,146,'8'); line(25,138,25,146,'6'); line(27,138,27,146,'8');
+  egg(22,136,6,3,['6','7','8','9']);
+  limb(26,134,31,119,1.1,'8'); P(27,128,'7'); P(28,125,'7');
+  ell(32,118,2.5,1.5,'8'); P(34,119,'6'); P(31,116,'N'); P(33,116,'N'); P(32,118,'2');
+  line(16,135,15,140,'7');
+  egg(41,145,7,5,['5','6','7','8']);
+  egg(48,142,3.5,3.5,['5','6','7','8']);
+  ell(46,142,2,3,'6'); limb(50,144,51,152,1,'7'); P(51,145,'9'); P(49,141,'2');
+  rect(36,148,2,5,'6'); rect(39,149,2,4,'7'); rect(43,148,2,5,'6'); rect(46,149,2,4,'7');
+  ell(40,139,1.5,1.5,'n'); P(40,137,'n'); P(41,137,'F');
+  // unicorn at the stream
+  egg(90,134,5,2.4,['7','8','9']);
+  line(86,136,86,142,'7'); line(88,136,88,142,'9'); line(93,136,93,142,'7'); line(95,136,95,142,'9');
+  limb(86,133,84,140,1,'9'); ell(84,141,1.8,1.2,'9'); line(83,140,80,137,'S'); line(95,133,97,137,'8');
+  // small beasts on the meadow
+  spr(62,150,["N.N...","NtN...",".ttttt","..tttt","..t..t"]);
+  spr(96,156,[".SS.....",".SSSSSS.","SSSSSSS.","S.S..S.S"]);
+  spr(70,160,["....n..","2222n..",".2222..",".2..2.."]);
+  spr(42,170,["2.","22","2."]); P(43,169,'r');
+  // a palm with the serpent round it
+  limb(104,160,101,134,1,'n'); for (var pm=136;pm<160;pm+=3) P(103-(pm-134)*0.1,pm,'N');
+  var fr=[[-9,-2],[-7,-5],[-2,-7],[4,-6],[8,-3],[9,1],[-8,2]];
+  for (var f=0;f<fr.length;f++){ line(101,133,101+fr[f][0],133+fr[f][1],f&1?'d':'g'); P(101+fr[f][0],134+fr[f][1],'D'); }
+  P(100,135,'N'); P(102,135,'N');
+  path([104,152, 101,150, 102,147, 104,145, 101,143, 102,140, 99,139],'g'); P(98,139,'r'); P(99,138,'G');
+  // the dragon tree behind adam
+  limb(16,204,16,182,2.5,'n'); line(15,202,15,184,'t'); line(17,203,17,186,'N');
+  var br=[[8,168],[24,168],[15,162],[4,176],[28,176]];
+  for (var b=0;b<br.length;b++){
+    limb(16,184,br[b][0],br[b][1]+2,1.2,'n');
+    ell(br[b][0],br[b][1],4.5,2.5,'D'); ell(br[b][0],br[b][1]-1,3.5,1.5,'d');
+    for (var sp=0;sp<7;sp++){ var an=Math.PI*(0.05+sp*0.15); line(br[b][0],br[b][1],br[b][0]+Math.cos(an)*6*(sp&1?0.7:1),br[b][1]-Math.sin(an)*4,sp&1?'d':'D'); }
+  }
+  // god presents eve to adam
+  var SK='f', SD='F';
+  limb(24,215,31,204,1.2,SD);
+  limb(33,214,31,201,2.2,SK);
+  limb(33,215,41,213,1.6,SK); limb(41,213,47,216,1.2,SK);
+  limb(34,214,39,208,1.5,SD); limb(39,208,42,216,1.1,SD);
+  limb(32,203,38,207,1,SK);
+  ell(31,197,2.5,3,SK); P(29,195,'h'); P(30,194,'h'); P(31,194,'h'); P(32,194,'h'); P(29,196,'h'); P(29,197,'h'); P(33,197,'2');
+  poly([52,181, 60,181, 65,217, 46,217], function(x){ return (x===50||x===54||x===58||x===62) ? 'R' : (x<51 ? 'o' : 'r'); });
+  rect(47,216,3,1,'f'); rect(59,216,3,1,'f');
+  ell(56,175,2.6,3.2,'f'); rect(54,172,5,1,'n'); P(53,173,'n'); P(53,174,'n'); P(59,173,'n');
+  rect(55,178,3,3,'n'); P(56,181,'n'); P(55,175,'2'); P(57,175,'2');
+  limb(52,183,47,188,1.4,'r'); limb(47,188,46,181,1.1,'r'); P(46,179,'f'); P(45,178,'f'); P(47,178,'f');
+  limb(60,183,64,192,1.3,'r'); P(65,193,'f'); P(66,193,'f');
+  limb(72,209,67,214,1.6,SK); limb(67,215,75,216,1.2,SD);
+  limb(72,210,71,199,2,SK);
+  limb(70,200,66,194,1,SK);
+  ell(70,195,2.5,3,SK); ell(71,193,2.8,1.6,'H');
+  limb(72,194,74,206,1.3,'H'); P(69,195,'2');
+  // the little pond in front, with odd creatures
+  ell(56,238,50,10, vg(['w','x'],228,248)); for (x=8;x<104;x++){ var py=Math.round(238-10*Math.sqrt(Math.max(0,1-Math.pow((x-56)/50,2)))); P(x,py,'W'); }
+  ell(36,233,2.5,1.5,'2'); line(34,232,32,229,'2'); P(31,229,'y');
+  ell(73,234,3,2,'t'); P(70,233,'o'); P(69,233,'o'); rect(74,231,2,2,'s');
+  ell(56,235,2,1.5,'e'); P(54,233,'e'); P(56,232,'e'); P(58,233,'e'); P(53,232,'y'); P(56,231,'y'); P(59,232,'y');
+  spr(86,230,["..22.","2222y",".22.."]);
+  // flowers and tufts in the grass
+  speck(R,0,150,110,70,90,'yk9GjS');
+  for (var tf=0;tf<40;tf++){ var gx=Math.floor(R()*110), gy=160+Math.floor(R()*62); P(gx,gy,'D'); P(gx+1,gy-1,'d'); P(gx-1,gy-1,'d'); }
+}
+
+/* ========================== THE GARDEN =========================== */
+var POOL={x:112,y:128,rx:30,ry:9}, TRACK={x:112,y:131,rx:76,ry:21};
+function paintGarden(){
+  var R=RNG(23);
+  panel(PC.x,PC.y,PC.iw,PC.ih);
+  rect(0,0,224,70, vg(['e','c','b','a'],0,62));
+  for (var x=0;x<224;x++){
+    var top=Math.round(56+3*Math.sin(x*0.07+1)+2*Math.sin(x*0.19));
+    for (var y=top;y<70;y++) P(x,y, y===top?'a':rampInk(['m','M'],(y-top)/10));
+  }
+  rect(0,66,224,40, vg(['W','w'],66,104));
+  for (var z=0;z<30;z++){ rect(Math.floor(R()*220),70+Math.floor(R()*30),2+Math.floor(R()*5),1,'W'); }
+  var shore=[];
+  for (x=0;x<224;x++) shore[x]=Math.round(102+2*Math.sin(x*0.05)+1.5*Math.sin(x*0.17+2));
+  var meadow=function(x,y){ var n=fbm((x+OX)*0.06,(y+OY)*0.09); return rampInk(['D','d','g','G','j'], 0.64+0.62*(n-0.5)-0.1*(y-100)/140); };
+  for (x=0;x<224;x++){ for (y=shore[x];y<240;y++) P(x,y,meadow); P(x,shore[x],'j'); }
+
+  // the five fountains of the lake
+  var rock=function(x,y){ return rampInk(['x','M','m','a'], 0.2+0.6*fbm((x+OX)*0.14,(y+OY)*0.08)); };
+  // centre: the cracked blue globe with the pink spire
+  ell(112,99,15,3,'x'); ell(112,98,13,2,'w');
+  ball(112,89,9,['x','B','l','W']);
+  path([106,85, 109,88, 112,87, 114,91, 117,90],'x');
+  poly([110,81, 114,81, 113,50, 111,50], hg(['k','p','P'],110,114));
+  ell(112,66,8,2.2,'P'); ell(112,65,7,1.5,'p');
+  path([111,74, 106,68, 103,60, 103,54],'l'); path([113,74, 118,68, 121,60, 121,54],'l');
+  P(102,53,'W'); P(122,53,'W'); P(103,59,'B'); P(121,59,'B');
+  for (var sp=0;sp<5;sp++){ line(106+sp*3,64,105+sp*3.5,59-(sp%2)*2,'P'); }
+  ball(112,47,3,['P','p','k']); line(112,44,112,36,'P');
+  P(110,35,'S'); P(111,34,'S'); P(113,34,'S'); P(114,35,'S');
+  // left: a pink coral tower
+  ell(34,100,11,3,'P'); ell(34,99,9,2,'p');
+  poly([30,99, 38,99, 36,70, 32,70], hg(['k','p','P'],30,38));
+  ball(34,64,7,['P','p','k']);
+  for (var i=0;i<8;i++){ var a=-Math.PI*(0.05+0.9*i/7); line(34+Math.cos(a)*7,64+Math.sin(a)*7,34+Math.cos(a)*11,64+Math.sin(a)*11,'P'); }
+  ell(34,66,2,2,'u'); P(34,66,'f');
+  // blue rock with an arch
+  poly([58,101, 82,101, 78,88, 76,74, 72,62, 69,57, 66,64, 64,76, 62,88], rock);
+  ell(70,92,3.5,6,'x'); ball(69,55,2.5,['D','d','g']); line(69,57,69,59,'N');
+  // pink tower with horns
+  ell(154,100,10,3,'P');
+  poly([148,99, 160,99, 158,80, 150,80], hg(['k','p','P'],148,160));
+  egg(154,75,8,5.5,['P','p','k']); ell(154,76,3,2,'u'); P(153,76,'f'); P(155,76,'F');
+  path([148,73, 144,66, 140,58],'p'); path([160,73, 164,66, 168,58],'p'); P(140,57,'k'); P(168,57,'k');
+  line(154,70,154,44,'P'); ball(154,43,1.6,['P','p','k']);
+  // blue tower with a crescent
+  poly([184,101, 208,101, 203,84, 201,66, 196,50, 191,66, 189,84], rock);
+  ell(196,82,2,3,'x'); path([190,76, 184,70, 182,62],'M'); path([202,76, 208,70, 210,62],'M');
+  P(194,47,'S'); P(195,46,'S'); P(197,46,'S'); P(198,47,'S');
+  // bathers and divers round the fountains
+  legsUp(48,99); legsUp(128,100,'q'); legsUp(174,98); legsUp(86,97);
+  swimmer(96,95); swimmer(140,93,'f','H'); swimmer(20,92); swimmer(208,96,'q'); swimmer(63,103);
+  // tiny people up on the fountains
+  nude(111,79,1,1); nude(153,70,0,-1); nude(33,56,1,1,'q'); nude(68,55,0,1);
+
+  // the middle band: the bathing pool and the cavalcade track round it
+  for (y=104;y<160;y++) for (x=0;x<224;x++){
+    var dx=(x-TRACK.x)/TRACK.rx, dy=(y-TRACK.y)/TRACK.ry, d=Math.sqrt(dx*dx+dy*dy);
+    if (d>0.9&&d<1.1) P(x,y, (hash(x,y)<0.3) ? 'j' : 'G');
+  }
+  ell(POOL.x,POOL.y,POOL.rx+2,POOL.ry+1.5,'D');
+  ell(POOL.x,POOL.y,POOL.rx+1,POOL.ry+0.6,'d');
+  ell(POOL.x,POOL.y,POOL.rx,POOL.ry, vg(['W','w','x'],POOL.y-POOL.ry,POOL.y+POOL.ry));
+  // trees and bushes round the meadow
+  var trees=[[10,112,7],[28,117,5],[196,112,7],[214,119,5],[150,107,3],[74,107,3],[54,112,4],[170,113,4]];
+  for (var tr=0;tr<trees.length;tr++){
+    var T=trees[tr]; rect(T[0],T[1]+T[2]-1,1,4,'N'); ball(T[0],T[1],T[2],['D','d','g','G']);
+    for (var fr=0;fr<T[2];fr++) P(T[0]-T[2]+1+Math.floor(R()*T[2]*2-1), T[1]-T[2]+2+Math.floor(R()*T[2]*1.6), tr&1?'r':'z');
+  }
+  // pink pods with people inside
+  ball(22,145,7,['P','p','k']); ell(24,146,3.5,3,'u'); P(23,146,'f'); P(25,146,'F'); P(23,145,'h');
+  ball(204,148,6,['P','p','k']); ell(203,149,3,2.5,'u'); P(203,149,'f');
+  // people round the pool and on the track
+  for (var pp=0;pp<34;pp++){
+    var px=Math.floor(R()*218)+3, py=108+Math.floor(R()*50);
+    var tdx=(px-TRACK.x)/TRACK.rx, tdy=(py-TRACK.y)/TRACK.ry, td=Math.sqrt(tdx*tdx+tdy*tdy);
+    if (td>0.75&&td<1.28) continue;                          // keep the track clear for the riders
+    var pdx=(px-POOL.x)/(POOL.rx+4), pdy=(py-POOL.y)/(POOL.ry+4);
+    if (pdx*pdx+pdy*pdy<1) continue;
+    if (R()<0.75) nude(px,py,Math.floor(R()*3),R()<0.5?1:-1,R()<0.12?'q':'f',R()<0.25?'H':'h');
+    else sitter(px,py,R()<0.5?1:-1,'f',R()<0.3?'H':'h');
+  }
+
+  // the foreground: giant birds, giant fruit, and the crowd, painted back to front
+  var items=[];
+  function add(y,fn){ items.push({y:y,fn:fn}); }
+  add(176,function(){ kingfisher(4,170); });
+  add(204,function(){ goldfinch(10,198); });
+  add(186,function(){ hoopoe(32,180); });
+  add(232,function(){ woodpecker(4,226); });
+  add(166,function(){ owl(46,158); });
+  add(195,function(){ strawberry(80,184,9); });
+  add(229,function(){ strawberry(150,220,8); });
+  add(186,function(){ strawberry(206,178,6); });
+  add(214,function(){ cherries(60,208); });
+  add(180,function(){ berries(122,174,6,['R','r','z'],R); });
+  add(202,function(){ berries(186,194,7,['@','%','k'],R); });
+  add(224,function(){ berries(104,218,5,['@','%','l'],R); });
+  add(236,function(){ mussel(38,228); });
+  add(197,function(){ bubble(166,186,9); });
+  add(240,function(){ cave(206,232); });
+  add(214,function(){ fishMan(122,206); });
+  for (var n=0;n<120;n++){
+    (function(){
+      var px=6+Math.floor(R()*214), py=164+Math.floor(R()*74), t=R(), dir=R()<0.5?1:-1;
+      var sk=R()<0.12?'q':'f', hair=R()<0.22?'H':(R()<0.6?'h':'1'), pose=Math.floor(R()*3), lh=R()<0.3;
+      var fruit = R()<0.12 ? (R()<0.5?'r':'@') : null;
+      add(py,function(){
+        if (t<0.5){ nude(px,py,fruit?1:pose,dir,sk,hair,lh); if (fruit) ball(px+0.5,py-12,1.8,fruit==='r'?['R','r','z']:['@','%']); }
+        else if (t<0.7) sitter(px,py,dir,sk,hair);
+        else if (t<0.85) lier(px,py,dir,sk,hair);
+        else { nude(px,py,0,1,sk,hair); nude(px+3,py,0,-1,R()<0.5?'f':'q','H',true); }
+      });
+    })();
+  }
+  items.sort(function(a,b){ return a.y-b.y; });
+  items.forEach(function(it){ it.fn(); });
+  speck(R,0,160,224,80,110,'yk9j');
+}
+function kingfisher(x,y){ // x,y = top-left
+  egg(x+8,y+5,6,3.5,['x','B','l']); ell(x+9,y+7,4,1.6,'o'); ball(x+14,y+2,3,['x','B','l']);
+  line(x+16,y+2,x+21,y+3,'2'); P(x+15,y+1,'0'); P(x+15,y+3,'o'); line(x+2,y+4,x-1,y+6,'B'); line(x+6,y+9,x+6,y+11,'o'); line(x+10,y+9,x+10,y+11,'o');
+}
+function goldfinch(x,y){
+  egg(x+9,y+6,7,4,['n','t','s']); ell(x+8,y+5,5,2.2,'2'); line(x+4,y+5,x+12,y+5,'y'); P(x+6,y+4,'9'); P(x+10,y+4,'9');
+  ball(x+16,y+2,3.2,['t','s','9']); rect(x+15,y-1,3,2,'2'); rect(x+17,y+1,2,3,'r'); P(x+14,y+2,'9'); P(x+16,y+1,'0');
+  line(x+19,y+2,x+21,y+3,'s'); line(x+2,y+6,x-2,y+4,'2'); P(x-2,y+3,'9');
+  line(x+8,y+10,x+7,y+13,'N'); line(x+11,y+10,x+11,y+13,'N');
+}
+function hoopoe(x,y){
+  egg(x+7,y+5,5.5,3.2,['o','t','s']); for (var i=0;i<5;i++){ P(x+3+i*2,y+4,'2'); P(x+3+i*2,y+5,'9'); }
+  ball(x+12,y+1,2.4,['o','t','s']); line(x+14,y+2,x+18,y+4,'2'); P(x+12,y,'0');
+  path([x+9,y-1, x+10,y-4, x+12,y-3, x+13,y-5, x+14,y-2],'o'); P(x+10,y-4,'2'); P(x+13,y-5,'2');
+  line(x+2,y+5,x-2,y+7,'2'); line(x+6,y+8,x+6,y+10,'N'); line(x+9,y+8,x+9,y+10,'N');
+}
+function woodpecker(x,y){
+  egg(x+7,y+4,6,3,['D','d','g','G']); ball(x+13,y+1,2.6,['d','g','G']); rect(x+12,y-2,3,2,'r'); P(x+14,y+1,'0'); P(x+13,y+2,'2');
+  line(x+15,y+1,x+19,y+1,'4'); line(x+1,y+4,x-2,y+6,'D'); for (var i=0;i<4;i++) P(x+4+i*2,y+3,'y');
+}
+function owl(x,y){
+  egg(x+4,y+5,4,5,['N','n','t']); ball(x+4,y+1,3.4,['N','n','t']);
+  ell(x+2,y+1,1.5,1.5,'s'); ell(x+6,y+1,1.5,1.5,'s'); P(x+2,y+1,'y'); P(x+6,y+1,'y'); P(x+3,y+1,'0'); P(x+7,y+1,'0'); P(x+4,y+3,'o');
+  P(x+1,y-2,'N'); P(x+7,y-2,'N'); for (var i=0;i<3;i++){ P(x+2+i*2,y+6,'s'); P(x+3+i*2,y+8,'s'); }
+  P(x+3,y+10,'Y'); P(x+5,y+10,'Y');
+}
+function mussel(cx,cy){
+  ell(cx,cy,13,6,function(x,y){ return ((x-y)&3)===0 ? 'N' : ((x+y)&7)===0 ? 'I' : 'n'; });
+  ell(cx+3,cy-3,11,4,function(x,y){ return ((x+y)&3)===0 ? 'N' : 'n'; });
+  ell(cx+1,cy-1,8,2,'u'); P(cx-3,cy-2,'f'); P(cx-2,cy-3,'F'); P(cx+2,cy-1,'f'); P(cx+4,cy-2,'h');
+  rect(cx+11,cy-6,1,4,'f'); rect(cx+13,cy-7,1,5,'F');
+}
+function bubble(cx,cy,r){
+  ell(cx,cy,r,r,tint('a','1'));
+  nude(cx-3,cy+4,0,1,'f','h'); nude(cx+1,cy+4,0,-1,'f','H',true);
+  ring(cx,cy,r,0.6,'a'); for (var a=3.4;a<4.4;a+=0.08) P(cx+Math.cos(a)*(r-2),cy+Math.sin(a)*(r-2),'9');
+  ell(cx,cy+r+1,4,1.2,'D');
+}
+function cave(cx,cy){
+  ell(cx,cy,18,11,function(x,y){ return rampInk(['u','N','n','t'],0.25+0.6*fbm((x+OX)*0.2,(y+OY)*0.2)); });
+  ell(cx+2,cy+2,9,6,'u'); ell(cx+2,cy+3,7,4,'0');
+  nude(cx-1,cy+6,0,1,'f','h'); nude(cx+3,cy+6,0,-1,'f','H',true);
+  ball(cx-10,cy-10,3,['D','d','g']); ball(cx+12,cy-9,2.5,['D','d','g']);
+}
+function fishMan(x,y){
+  egg(x+8,y-4,9,3,['x','w','W','9']); P(x+15,y-5,'0'); P(x+16,y-3,'R');
+  poly([x-1,y-4, x-5,y-8, x-5,y],'w'); for (var i=0;i<4;i++) P(x+4+i*3,y-6,'x');
+  nude(x+2,y+2,1,1,'f','h'); nude(x+13,y+2,1,-1,'q','1');
+}
+
+/* ============================== HELL ============================== */
+function paintHell(){
+  var R=RNG(666);
+  panel(PR.x,PR.y,PR.iw,PR.ih);
+  // sky glowing over the burning city
+  rect(0,0,110,60, vg(['v','V','X','R','Y'],0,60));
+  for (var b=0;b<22;b++){
+    var bx=Math.floor(R()*108)-2, bw=3+Math.floor(R()*8), bh=5+Math.floor(R()*20);
+    rect(bx,58-bh,bw,bh,'0');
+    if (R()<0.45) poly([bx-0.5,58-bh, bx+bw-0.5,58-bh, bx+bw/2-0.5,58-bh-4-R()*7],'0');
+    for (var wn=0;wn<bw*bh/14;wn++) P(bx+1+Math.floor(R()*(bw-2)), 58-bh+2+Math.floor(R()*(bh-3)), R()<0.6?'Y':'y');
+  }
+  rect(22,20,3,38,'0'); poly([21.5,20, 25.5,20, 23.5,10],'0'); P(23,24,'Y'); P(23,30,'y');   // a tall tower
+  rect(84,34,5,24,'0'); line(80,26,94,40,'0'); line(80,40,94,26,'0'); line(81,26,93,40,'0');  // the windmill
+  var FIRES=[8,30,46,63,77,98];
+  for (var fi=0;fi<FIRES.length;fi++){ ell(FIRES[fi],57,4,2.2,'Y'); ell(FIRES[fi],57,2,1.2,'y'); }
+  // the river and the ground
+  rect(0,58,110,12, vg(['v','u'],58,70));
+  for (var rf=0;rf<FIRES.length;rf++) for (var k=0;k<5;k++) rect(FIRES[rf]-2+Math.floor(R()*4),60+k*2,2+Math.floor(R()*3),1,k<2?'Y':(k<4?'Z':'X'));
+  rect(0,70,110,170, function(x,y){ return rampInk(['v','V','i','I'], 0.18+0.55*fbm((x+OX)*0.08,(y+OY)*0.08)); });
+  // little fires and their glow scattered around
+  var glows=[[8,78],[100,86],[16,136],[96,132],[52,186],[6,236],[104,200]];
+  for (var g=0;g<glows.length;g++){ ell(glows[g][0],glows[g][1],6,3,'X'); ell(glows[g][0],glows[g][1],3,1.5,'Z'); P(glows[g][0],glows[g][1],'Y'); P(glows[g][0],glows[g][1]-1,'y'); }
+  // frozen lake with the skaters
+  ell(56,157,62,19, function(x,y){ var yc=((OY+y)&~1)-OY; return rampInk(['A','E','C'],0.25+0.6*fbm((x+OX)*0.05,(y+OY)*0.2)+(yc-157)*-0.01); });
+  for (var c=0;c<9;c++){ var cx=10+Math.floor(R()*90), cy=146+Math.floor(R()*22); path([cx,cy, cx+3,cy+1, cx+5,cy-1, cx+8,cy],'A'); }
+  ell(18,164,5,2,'x'); ell(18,164,3,1,'v'); P(17,163,'h'); P(18,163,'h'); P(17,164,'f'); P(18,164,'f'); P(14,163,'f'); P(22,162,'F');
+  // the tree-man: tree trunk legs standing in boats, a broken egg for a body
+  limb(48,112,44,140,3,'N'); limb(44,140,42,167,2.6,'N'); line(47,114,44,138,'n'); line(44,142,42,164,'n');
+  limb(66,112,70,140,3,'N'); limb(70,140,72,167,2.6,'N'); line(67,114,70,138,'n'); line(70,142,72,164,'n');
+  path([46,113, 40,104, 34,97],'N'); line(40,104,34,103,'N'); path([68,110, 76,100, 83,94],'N'); line(76,100,84,101,'N');
+  poly([32,168, 54,168, 50,174, 36,174],'n'); line(32,168,54,168,'t');
+  poly([62,168, 84,168, 80,174, 66,174],'n'); line(62,168,84,168,'t');
+  egg(58,104,17,10,['4','5','7','8','9']);
+  ell(69,106,7,5,'u'); for (var sh=0;sh<10;sh++){ var an=sh*0.63; P(69+Math.cos(an)*7.5,106+Math.sin(an)*5.5,'9'); }
+  rect(65,108,8,1,'n'); P(66,107,'f'); P(68,107,'F'); P(71,107,'f'); P(70,104,'Y'); P(72,109,'N'); P(66,109,'N');
+  line(80,136,73,111,'n'); line(83,136,76,111,'n');                                         // a ladder up to the tavern
+  for (var lg=113; lg<136; lg+=3){ var lx=73+(lg-111)*7/25; line(lx+1,lg,lx+3,lg,'t'); }
+  P(79,124,'f'); P(80,124,'F'); P(79,123,'h'); P(80,125,'f'); P(81,126,'F');
+  egg(41,92,5,5.5,['q','F','f','k']); P(39,91,'2'); P(42,91,'2'); P(41,95,'q'); P(40,95,'q'); P(38,93,'F');
+  ell(42,85,14,3, hg(['k','p','P'],28,56)); line(28,86,56,86,'P');
+  egg(42,78,3.5,4,['P','p','k']); line(42,74,45,68,'P'); P(46,67,'P'); line(40,80,35,77,'P');
+  // the prince of hell: blue, bird headed, on his high chair, a cauldron on his head
+  rect(68,176,2,46,'N'); rect(100,176,2,46,'N'); rect(68,174,34,2,'n'); rect(68,206,34,3,'n'); rect(66,221,4,1,'N'); rect(98,221,4,1,'N');
+  egg(85,194,10,12,['v','B','l']);
+  limb(80,205,75,217,2,'B'); limb(90,205,95,217,2,'B');
+  egg(75,220,3.5,4,['3','5','7']); egg(95,220,3.5,4,['3','5','7']);
+  egg(86,179,6,5,['x','B','l']); P(84,177,'y'); P(88,178,'y');
+  poly([89,179, 97,181, 89,183],'N'); line(89,181,96,181,'u');
+  egg(86,172,7,2.4,['3','5','7']); rect(80,170,13,1,'6');
+  limb(78,190,70,184,1.3,'B'); limb(92,190,99,196,1.3,'B'); P(69,183,'l'); P(100,197,'l');
+  // the pit under the chair, the souls end up in it
+  ell(85,232,14,5,'N'); ell(85,232,12,3.6,'v'); ell(85,231,8,2,'0');
+  // musical instruments: harp, lute, drum
+  limb(8,214,10,168,1.3,'n'); path([10,167, 16,166, 22,170, 28,180],'n'); path([10,168, 16,167, 22,171, 28,181],'t');
+  limb(28,182,10,212,1.5,'t'); line(29,183,11,213,'n');
+  for (var hs=12;hs<27;hs+=2){ var y0=167+Math.round((hs-10)*0.8), y1=212-Math.round((hs-10)*1.65); line(hs,y0,hs,y1,'s'); }
+  limb(13,190,23,186,1,'f'); limb(18,188,19,198,1,'F'); P(12,189,'h'); P(24,185,'f'); P(18,199,'f');
+  egg(40,212,9,7,['N','n','t','s']); ell(40,211,2,2,'u'); limb(33,206,22,190,1.2,'N'); line(22,190,18,192,'N'); line(20,191,19,189,'n');
+  line(34,205,23,191,'s'); line(35,207,24,193,'s');
+  lier(30,221,-1,'f','h'); P(29,219,'f');
+  egg(18,228,7,4,['R','r','z']); ell(18,225,7,1.6,'s'); line(12,222,6,216,'t'); line(24,222,28,217,'t');
+  // sinners and demons standing about
+  var people=[[28,132],[14,196],[56,196],[60,232],[50,222],[102,168],[12,110],[92,118],[34,146]];
+  for (var pe=0;pe<people.length;pe++) nude(people[pe][0],people[pe][1],Math.floor(R()*3),R()<0.5?1:-1,'f',R()<0.5?'h':'1');
+  var demons=[[31,134],[58,198],[16,112]];
+  for (var de=0;de<demons.length;de++){ var dx=demons[de][0], dy=demons[de][1]; rect(dx,dy-6,2,6,'i'); P(dx,dy-7,'I'); P(dx+1,dy-8,'I'); P(dx,dy-6,'y'); line(dx+2,dy-4,dx+4,dy-7,'4'); }
+  speck(R,0,70,110,170,40,'Z');
+}
+
+/* ======================== THE SHUTTERS =========================== */
+// closed, the wings show the world on the third day of creation, in grisaille
+function paintShutters(){
+  var R=RNG(3);
+  var cx=114, cy=122, r=104;
+  rect(0,0,228,DOORS.h, function(x,y){ return rampInk(['#','J'], 0.3+0.5*fbm(x*0.05,y*0.05)); });
+  // inside the sphere: dark air, clouds, light
+  ell(cx,cy,r,r, function(x,y){ var yc=((OY+y)&~1)-OY; return rampInk(['J','U','Q'], 0.15+0.5*(1-(yc-(cy-r))/(2*r))+0.3*(fbm(x*0.04,y*0.06)-0.5)); });
+  var clouds=[[56,78,20,9],[96,56,26,10],[150,62,24,9],[182,88,16,7],[122,84,18,6],[36,104,10,5]];
+  for (var c=0;c<clouds.length;c++){ var q=clouds[c]; egg(q[0],q[1],q[2],q[3],['U','Q','O','L'],0.1); egg(q[0]+q[2]*0.4,q[1]-q[3]*0.5,q[2]*0.6,q[3]*0.8,['Q','O','L'],0.15); }
+  for (var ray=0;ray<9;ray++){ var rx=60+ray*14, rtop=70+(ray%3)*6; for (var yy=rtop; yy<116; yy+=3) P(rx+(yy-rtop)*0.35, yy, 'O'); }
+  // the flat earth floating in it
+  function onDisc(x,y,m){ var dx=(x-cx)/(98-m), dy=(y-136)/(34-m*0.35); return dx*dx+dy*dy<=1; }
+  ell(cx,136,98,34, function(x,y){
+    var n=fbm(x*0.045+3,y*0.11), edge=Math.sqrt(Math.pow((x-cx)/98,2)+Math.pow((y-136)/34,2));
+    n-=Math.max(0,edge-0.75)*1.2;
+    if (n<0.36) return rampInk(['#','J','U'], 0.35+n);
+    return rampInk(['U','Q','O','L'], 0.25+(n-0.36)*1.3+(136-y)*0.004);
+  });
+  for (var cl=0; cl<16; cl++){
+    var a=R()*6.283, d=Math.sqrt(R())*0.75, fx=cx+Math.cos(a)*d*92, fy=136+Math.sin(a)*d*30;
+    for (var t=0;t<16;t++){ var bx=fx+(R()-0.5)*16, by=fy+(R()-0.5)*6; if (onDisc(bx,by,4)) ball(bx,by,0.9+R()*1.3,['J','U','Q','O']); }
+  }
+  for (var rx=18; rx<210; rx++){ var ry=140+4*Math.sin(rx*0.045)+2*Math.sin(rx*0.13+1); if (onDisc(rx,ry,2)){ P(rx,ry,'J'); P(rx,ry+1,'#'); } }
+  var peaks=[[34,130,9],[48,126,12],[62,132,8],[176,126,9],[190,131,7]];
+  for (var m=0;m<peaks.length;m++){ var mx=peaks[m][0], my=peaks[m][1], mh=peaks[m][2]; poly([mx-mh*0.8,my, mx,my-mh, mx+mh*0.8,my],'O'); poly([mx,my-mh, mx+mh*0.8,my, mx+1,my],'Q'); P(mx,my-mh,'L'); }
+  ell(cx,176,90,8, function(x,y){ return rampInk(['#','J','U'], 0.4+0.5*fbm(x*0.08,y*0.3)); });
+  // the glass: a light rim and a reflection
+  ring(cx,cy,r,0.55,'O'); ring(cx,cy,r-1,0.5,'Q');
+  for (var an=3.5; an<4.9; an+=0.01){ P(cx+Math.cos(an)*(r-3),cy+Math.sin(an)*(r-3),'L'); P(cx+Math.cos(an)*(r-4),cy+Math.sin(an)*(r-4),'O'); }
+  for (an=0.2; an<0.9; an+=0.02) P(cx+Math.cos(an)*(r-5),cy+Math.sin(an)*(r-5),'O');
+  // god the father, top left, with tiara and book
+  egg(20,24,9,6,['U','Q','O','L']);
+  poly([16,30, 24,30, 23,19, 17,19],'O'); line(17,19,17,30,'L'); rect(18,24,4,3,'L'); line(18,25,21,25,'Q');
+  ball(20,16,2.2,['Q','O','L']); poly([18,14, 22,14, 20,8],'L'); P(20,11,'O'); P(19,13,'Q'); P(21,13,'Q');
+}
+
+
+/* ========================= moving things ========================== */
+/* --- paradise --- */
+var flock=[];
+for (var fb=0;fb<40;fb++) flock.push({o:fb/40+Math.random()*0.012, jx:(Math.random()-0.5)*4, jy:(Math.random()-0.5)*3, k:Math.floor(Math.random()*4)});
+var BIRD=[[[-2,-2],[-1,-1],[0,0],[1,-1],[2,-2]], [[-2,0],[-1,-1],[0,0],[1,-1],[2,0]], [[-2,1],[-1,0],[0,0],[1,0],[2,1]], [[-2,0],[-1,-1],[0,0],[1,-1],[2,0]]];
+function drawFlock(){
+  var T=tick*0.0021;
+  for (var i=0;i<flock.length;i++){
+    var b=flock[i], p=(T+b.o)%1;
+    var x=97-124*p-40*Math.sin(2*Math.PI*p)+b.jx*p*2, y=44-16*(1-Math.cos(2*Math.PI*p))-12*p+b.jy*p;
+    if (x<1||x>108||y<1) continue;
+    var fr=BIRD[((tick>>1)+b.k)&3];
+    for (var j=0;j<fr.length;j++) dp(PL.x+x+fr[j][0], PL.y+y+fr[j][1], p<0.04 ? K.M : K['2']);
+  }
+}
+var SWAN=rowsSpr(["9o...","99...",".9...",".9.99","9999.",".999."]);
+var swans=[{x:24,y:98,ph:0,a:8},{x:80,y:110,ph:2,a:10},{x:66,y:92,ph:4,a:6}];
+function drawSwans(){
+  for (var i=0;i<swans.length;i++){
+    var s=swans[i], v=Math.cos(tick*0.012+s.ph), x=s.x+s.a*Math.sin(tick*0.012+s.ph);
+    dspr(SWAN,PL.x+x,PL.y+s.y,v>0);
+  }
+}
+var drops=[];
+function updateFountain(){
+  for (var k=0;k<2;k++){
+    var side=k?1:-1;
+    drops.push({x:55+side*4, y:111, vx:side*(0.5+Math.random()*0.5), vy:-0.8-Math.random()*0.5});
+  }
+  for (var i=drops.length-1;i>=0;i--){ var d=drops[i]; d.x+=d.vx; d.y+=d.vy; d.vy+=0.22; if (d.y>127) drops.splice(i,1); }
+}
+function drawFountain(){
+  for (var i=0;i<drops.length;i++) dp(PL.x+drops[i].x, PL.y+drops[i].y, i&1?K.a:K['9']);
+  if (tick%70<3){ dp(PL.x+54,PL.y+121,K.n); dp(PL.x+56,PL.y+121,K.n); }    // the owl blinks
+}
+var RABBIT=[rowsSpr(["..9.9","..999","9999.",".9.9."]), rowsSpr(["...9.9","...999","99999.","9....9"])];
+var rabbit={x:60,dir:1};
+function drawRabbit(){
+  var ph=tick%12, hop = ph<6 ? Math.round(Math.sin(ph/6*Math.PI)*3) : 0;
+  if (ph<6) rabbit.x+=rabbit.dir*0.5;
+  if (rabbit.x>96) rabbit.dir=-1; if (rabbit.x<50) rabbit.dir=1;
+  dspr(RABBIT[ph<6?1:0], PL.x+rabbit.x, PL.y+172-hop, rabbit.dir<0);
+}
+var flies=[]; for (var bf=0;bf<7;bf++) flies.push({x:10+Math.random()*90, y:150+Math.random()*60, c:['y','9','o','l','k'][bf%5]});
+function drawButterflies(){
+  for (var i=0;i<flies.length;i++){
+    var f=flies[i]; f.x=clamp(f.x+(Math.random()-0.5)*1.6,4,106); f.y=clamp(f.y+(Math.random()-0.5)*1.2,140,222);
+    dp(PL.x+f.x,PL.y+f.y,K[f.c]); if ((tick+i)&2){ dp(PL.x+f.x-1,PL.y+f.y-1,K[f.c]); dp(PL.x+f.x+1,PL.y+f.y-1,K[f.c]); }
+  }
+}
+
+/* --- the garden --- */
+// mounts face right; seat = where the rider's hips go
+var MOUNTS = {
+  horse:{ seat:[5,3], rows:[
+    ["..........N..", ".........nnn.", "........nnnnn", ".......Nnn...", "..nnnnnnnn...", ".Nnnnnnnnn...", ".N.nnnnnnn...", "...n.n..n.n..", "...N.N..N.N.."],
+    ["..........N..", ".........nnn.", "........nnnnn", ".......Nnn...", "..nnnnnnnn...", ".Nnnnnnnnn...", ".N.nnnnnnn...", "..n...nn...n.", ".N.....NN...N"]] },
+  pig:{ seat:[5,0], rows:[
+    ["........P...", "..pppppppp..", ".pppppppppPp", "Ppppppppppp.", "..pppppppp..", "..P.P..P.P.."],
+    ["........P...", "..pppppppp..", ".pppppppppPp", "Ppppppppppp.", "..pppppppp..", ".P..P.P..P.."]] },
+  camel:{ seat:[5,1], rows:[
+    ["...........t.", "..........ttt", ".....t....t..", "....ttt...t..", "...ttttt.tt..", "..ttttttttt..", ".tttttttttt..", "t..tttttt....", "...t.t..t.t..", "...t.t..t.t..", "...N.N..N.N.."],
+    ["...........t.", "..........ttt", ".....t....t..", "....ttt...t..", "...ttttt.tt..", "..ttttttttt..", ".tttttttttt..", "t..tttttt....", "..t...tt...t.", "..t...tt...t.", ".N.....NN...N"]] },
+  bear:{ seat:[5,0], rows:[
+    ["........N.N.", "..NNNNNNNNN.", ".NNNNNNNNNNN", ".NNNNNNNNNNn", "..NNNNNNNN..", "..NN..N..NN."],
+    ["........N.N.", "..NNNNNNNNN.", ".NNNNNNNNNNN", ".NNNNNNNNNNn", "..NNNNNNNN..", ".NN..NN.NN.."]] }
+};
+function riderSprite(kind,frame,map,extra,sk,hair){
+  var m=MOUNTS[kind], rows=m.rows[frame], w=rows[0].length+4, h=rows.length+10;
+  return mkSpr(w,h,function(){
+    spr(2,10,rows,false,map);
+    if (extra==='horn'){ line(15,11,17,9,'S'); }
+    if (extra==='antlers'){ path([12,10, 12,8, 11,6],'N'); path([13,10, 14,8, 15,6],'N'); P(10,7,'N'); P(16,7,'N'); }
+    var x=2+m.seat[0], y=10+m.seat[1], s=sk, d=sk==='q'?'N':'F';
+    rect(x,y-4,1,4,s); rect(x+1,y-4,1,4,d); P(x,y-5,s); P(x+1,y-5,s); P(x,y-6,hair); P(x+1,y-6,hair); P(x,y-5,hair);
+    P(x+1,y+1,d); P(x+1,y+2,d);
+    if (extra==='fish'){ rect(x+2,y-8,1,5,d); rect(x,y-10,5,2,'w'); P(x-1,y-11,'x'); P(x-1,y-8,'x'); P(x+4,y-10,'0'); }
+    else if (extra==='cherry'){ rect(x-1,y-8,1,5,s); ball(x-1,y-10,1.6,['R','r','z']); rect(x+2,y-4,1,3,d); }
+    else if (extra==='bird'){ rect(x,y-8,2,1,'2'); P(x+2,y-8,'y'); P(x-1,y-7,'2'); rect(x+2,y-4,1,3,d); rect(x-1,y-4,1,3,s); }
+    else if (extra==='up'){ rect(x-1,y-8,1,4,s); rect(x+2,y-8,1,4,d); }
+    else { rect(x+2,y-4,2,1,d); rect(x-1,y-4,1,3,s); }
+  });
+}
+var RIDER_TYPES = [
+  ['horse',{n:'n',N:'N'},'fish'], ['pig',null,'up'], ['camel',null,'cherry'], ['horse',{n:'8',N:'6'},'up'],
+  ['bear',null,'bird'], ['horse',{n:'t',N:'n'},'antlers'], ['horse',{n:'9',N:'7'},'horn'], ['pig',{p:'n',P:'N'},'fish'],
+  ['horse',{n:'2',N:'1'},'cherry'], ['camel',{t:'s',N:'t'},'up'], ['horse',{n:'O',N:'U'},'bird'], ['bear',{N:'2',n:'3'},'up'],
+  ['horse',{n:'S',N:'T'},'cherry'], ['pig',null,'bird'], ['horse',{n:'8',N:'6'},'antlers'], ['camel',null,'fish'],
+  ['horse',{n:'n',N:'N'},'up'], ['horse',{n:'9',N:'7'},'horn'], ['bear',null,'cherry'], ['horse',{n:'2',N:'1'},'up'],
+  ['pig',{p:'k',P:'p'},'up'], ['horse',{n:'t',N:'n'},'fish']
+];
+var riders = RIDER_TYPES.map(function(rt,i){
+  var sk = i%5===3 ? 'q' : 'f', hair = ['h','H','1','h'][i%4];
+  return { ph:i/RIDER_TYPES.length*Math.PI*2, k:i%2, spr:[riderSprite(rt[0],0,rt[1],rt[2],sk,hair), riderSprite(rt[0],1,rt[1],rt[2],sk,hair)] };
+});
+function drawCavalcade(){
+  var list=[];
+  for (var i=0;i<riders.length;i++){
+    var r=riders[i], a=r.ph+tick*0.0075;
+    list.push({ r:r, x:TRACK.x+TRACK.rx*Math.cos(a), y:TRACK.y+TRACK.ry*Math.sin(a), left:Math.sin(a)>0 });
+  }
+  list.sort(function(p,q){ return p.y-q.y; });
+  for (var j=0;j<list.length;j++){
+    var o=list[j], sp=o.r.spr[((tick>>2)+o.r.k)&1];
+    dspr(sp, PC.x+o.x-sp.w/2, PC.y+o.y-sp.h+1, o.left);
+  }
+}
+var bathers=[];
+(function(){ var R=RNG(5); for (var i=0;i<12;i++){ var a=R()*6.28, d=Math.sqrt(R())*0.75; bathers.push({x:Math.round(POOL.x+Math.cos(a)*d*POOL.rx), y:Math.round(POOL.y+Math.sin(a)*d*POOL.ry), ph:R()*6.28, hair:['h','H','1','h','2'][i%5], hat: i%4===1 ? 'bird' : i%4===3 ? 'cherry' : null}); } })();
+function drawBathers(){
+  for (var i=0;i<bathers.length;i++){
+    var b=bathers[i], bob=Math.sin(tick*0.09+b.ph)>0.6 ? -1 : 0, x=PC.x+b.x, y=PC.y+b.y+bob;
+    dp(x,y-2,K[b.hair]); dp(x+1,y-2,K[b.hair]); dp(x,y-1,K.f); dp(x+1,y-1,K.f);
+    dp(x-1,y,K.f); dp(x,y,K.f); dp(x+1,y,K.F); dp(x+2,y,K.F);
+    dp(x-1,y+1,K.a); dp(x+2,y+1,K.a);
+    if (b.hat==='bird'){ dp(x,y-3,K['2']); dp(x+1,y-3,K['2']); dp(x+2,y-4,K['2']); dp(x+3,y-4,K.y); }
+    if (b.hat==='cherry'){ dp(x,y-3,K.r); dp(x+1,y-3,K.z); dp(x,y-4,K.r); dp(x+1,y-5,K.d); }
+  }
+}
+var FLYERS=[
+  { spr:[mkSpr(26,18,function(){ egg(13,13,8,2.6,['x','w','W']); poly([5,13, 1,9, 1,17],'w'); P(19,12,'0'); P(21,14,'R'); line(10,10,14,7,'W'); nude(11,11,1,1,'f','h'); }),
+         mkSpr(26,18,function(){ egg(13,13,8,2.6,['x','w','W']); poly([5,13, 1,11, 1,15],'w'); P(19,12,'0'); P(21,14,'R'); line(10,10,14,11,'W'); nude(11,11,1,1,'f','h'); })],
+    y:8, sp:0.28, x:10 },
+  { spr:[mkSpr(24,18,function(){ egg(8,13,6,2.6,['T','S','s']); ball(15,10,2.4,['T','S','s']); line(17,10,19,11,'N'); P(15,9,'0'); path([6,12, 8,6, 12,4],'n'); line(7,11,10,5,'t'); line(3,14,0,16,'S'); line(3,15,2,17,'S'); line(10,15,10,17,'S'); sitterR(8,10); }),
+         mkSpr(24,18,function(){ egg(8,13,6,2.6,['T','S','s']); ball(15,10,2.4,['T','S','s']); line(17,10,19,11,'N'); P(15,9,'0'); path([6,13, 9,15, 13,16],'n'); line(7,14,11,16,'t'); line(3,14,0,16,'S'); line(4,15,4,17,'S'); line(11,15,12,17,'S'); sitterR(8,10); })],
+    y:26, sp:0.22, x:120 },
+  { spr:[mkSpr(22,22,function(){ egg(11,6,4,2,['2','3']); P(15,5,'y'); P(16,6,'y'); path([8,5, 5,2, 1,1],'2'); path([14,5, 17,2, 21,1],'2'); nude(10,20,1,1,'f','H',true); }),
+         mkSpr(22,22,function(){ egg(11,6,4,2,['2','3']); P(15,5,'y'); P(16,6,'y'); path([8,6, 5,8, 1,9],'2'); path([14,6, 17,8, 21,9],'2'); nude(10,20,1,1,'f','H',true); })],
+    y:2, sp:0.35, x:170 }
+];
+function sitterR(x,y){ rect(x,y-4,1,4,'f'); rect(x+1,y-4,1,4,'F'); P(x,y-5,'f'); P(x+1,y-5,'f'); P(x,y-6,'h'); P(x+1,y-6,'h'); P(x+1,y+1,'F'); rect(x-1,y-8,1,4,'f'); }
+function drawFlyers(){
+  for (var i=0;i<FLYERS.length;i++){
+    var f=FLYERS[i], span=224+40, x=((f.x+tick*f.sp)%span)-24, y=f.y+Math.round(3*Math.sin(tick*0.03+i*2));
+    var sp=f.spr[(tick>>2)&1];
+    for (var q=0;q<sp.p.length;q+=3){ var px=x+sp.p[q]; if (px<0||px>=224) continue; dp(PC.x+px, PC.y+y+sp.p[q+1], sp.p[q+2]); }
+  }
+}
+var swim=[]; for (var sw=0;sw<7;sw++) swim.push({a:sw*0.9, r:24+sw*4, ph:Math.random()*6});
+function drawSwimmers(){
+  for (var i=0;i<swim.length;i++){
+    var s=swim[i], a=s.a+tick*0.004*(i&1?1:-1), x=PC.x+112+Math.cos(a)*s.r*2.4, y=PC.y+97+Math.sin(a)*3;
+    if (x<PC.x+2||x>PC.x+220) continue;
+    dp(x,y-1,K.h); dp(x+1,y-1,K.h); dp(x,y,K.f); dp(x+1,y,K.f);
+    if ((tick+i*5)%16<8){ dp(x-1,y,K.a); } else dp(x+2,y,K.a);
+  }
+}
+var wavers=[]; (function(){ var R=RNG(9); for (var i=0;i<16;i++) wavers.push({x:10+Math.floor(R()*204), y:170+Math.floor(R()*64), ph:Math.floor(R()*20), sk:R()<0.15?'q':'f', h:R()<0.3?'H':'h'}); })();
+function drawWavers(){
+  for (var i=0;i<wavers.length;i++){
+    var w=wavers[i], up=((tick+w.ph)%24)<12, x=PC.x+w.x, y=PC.y+w.y, s=K[w.sk], d=w.sk==='q'?K.N:K.F;
+    for (var j=0;j<4;j++){ dp(x,y-j,s); dp(x+1,y-j,d); dp(x,y-4-j,s); dp(x+1,y-4-j,d); }
+    dp(x,y-8,s); dp(x+1,y-8,s); dp(x,y-9,K[w.h]); dp(x+1,y-9,K[w.h]);
+    if (up){ for (j=0;j<4;j++){ dp(x-1,y-7-j,s); dp(x+2,y-7-j,d); } }
+    else { for (j=0;j<3;j++){ dp(x-1,y-5-j,s); dp(x+2,y-5-j,d); } }
+  }
+}
+
+/* --- hell --- */
+var fires=[], notes=[], souls=[];
+var FIRE_SRC=[[8,56],[30,56],[46,56],[63,56],[77,56],[98,56],[8,77],[100,85],[16,135],[96,131],[52,185],[6,235],[104,199]];
+function updateHell(){
+  for (var i=0;i<5;i++){
+    var s=FIRE_SRC[Math.floor(Math.random()*FIRE_SRC.length)], big=s[1]<60;
+    fires.push({x:s[0]+(Math.random()-0.5)*(big?7:3), y:s[1], vx:(Math.random()-0.5)*0.3, vy:-(big?0.9:0.5)-Math.random()*0.7, life:0, max:(big?14:7)+Math.random()*10});
+  }
+  for (var j=fires.length-1;j>=0;j--){ var f=fires[j]; f.x+=f.vx; f.y+=f.vy; f.vy*=0.97; if (++f.life>=f.max) fires.splice(j,1); }
+  if (tick%14===0){ var h=Math.random()<0.5; notes.push({x:h?18:36, y:h?176:198, life:0, ch:Math.random()<0.5?'♪':'♫'}); }
+  for (var n=notes.length-1;n>=0;n--){ var nt=notes[n]; nt.y-=0.35; nt.x+=Math.sin((nt.life+n)*0.2)*0.4; if (++nt.life>60) notes.splice(n,1); }
+  if (tick%18===0) souls.push({x:84+Math.random()*4-2, y:210, vy:0});
+  for (var q=souls.length-1;q>=0;q--){ var so=souls[q]; so.vy+=0.12; so.y+=so.vy; if (so.y>231) souls.splice(q,1); }
+}
+function drawFire(){
+  for (var i=0;i<fires.length;i++){
+    var p=fires[i], f=p.life/p.max, x=Math.round(PR.x+p.x), y=Math.round(PR.y+p.y);
+    if (x<PR.x||x>=PR.x+PR.iw||y<PR.y) continue;
+    var chr = f<0.35 ? '▓' : f<0.7 ? '▒' : '░';
+    var col = f<0.15 ? C(15) : f<0.4 ? C(14) : f<0.65 ? C(12) : f<0.85 ? C(4) : C(8);
+    dglyph(y>>1, x, chr, col);
+  }
+}
+function drawBeams(){
+  var src=[[24,20],[70,44]];
+  for (var b=0;b<2;b++){
+    var a=-Math.PI/2 + Math.sin(tick*0.012+b*2.1)*0.55, dx=Math.cos(a), dy=Math.sin(a);
+    for (var d=4; d<70; d+=1.4){
+      var x=Math.round(PR.x+src[b][0]+dx*d), y=Math.round(PR.y+src[b][1]+dy*d*1.0);
+      if (y<PR.y||x<PR.x||x>=PR.x+PR.iw) break;
+      if (((d*3)|0)%2) dglyph(y>>1, x, '░', K.s);
+    }
+  }
+}
+function ear(cx,cy){
+  egg(cx,cy,5.5,9,['q','F','f','k']);
+  ell(cx+1,cy+0.5,3.6,6.4,'F');
+  ell(cx+1.4,cy+2,2.2,4,'q'); P(cx+1,cy+3,'N');
+  path([cx-1,cy-5, cx-2,cy-2, cx-1,cy+2],'f');
+  P(cx-3,cy+3,'F'); P(cx+2,cy+8,'f');
+}
+var EARS = mkSpr(46,28,function(){
+  line(16,5,44,22,'n'); P(15,4,'9'); P(14,4,'7'); P(16,3,'7');                               // the arrow
+  ear(35,13); ear(27,11);
+  poly([0,16, 25,13, 26,19, 2,19], function(x,y){ return y<=14 ? '9' : y>=18 ? '5' : '7'; });   // the knife
+  line(1,18,25,18,'5'); rect(9,15,1,2,'4'); rect(12,15,1,2,'4'); P(10,15,'4'); P(11,16,'4');  // an "M" on the blade
+  line(44,22,45,24,'9');
+  lier(6,22,-1,'f','h'); lier(22,24,1,'f','1');
+});
+function drawEars(){ var x=PR.x+1+Math.round(4*Math.sin(tick*0.02)), y=PR.y+104+((tick>>3)&1); dspr(EARS,x,y,false); }
+var SKATER = mkSpr(14,13,function(){ line(1,12,12,12,'7'); path([12,12, 13,11, 13,10],'7'); rect(4,10,4,2,'n'); nude(5,9,0,1,'f','h'); P(4,4,'f'); P(3,3,'f'); P(8,4,'F'); P(9,3,'F'); poly([4,-1, 7,-1, 6,-4],'2'); });
+var skaters=[{x:30,y:151,v:0.35},{x:70,y:163,v:-0.28}];
+function drawSkaters(){
+  for (var i=0;i<skaters.length;i++){
+    var s=skaters[i]; s.x+=s.v; if (s.x>92||s.x<6) s.v=-s.v;
+    dspr(SKATER, PR.x+s.x, PR.y+s.y-12, s.v<0);
+  }
+}
+var RABBITH=[0,1].map(function(fr){ return mkSpr(24,20,function(){
+  egg(8,10,4,5,['N','n','t']); ball(9,4,2.6,['N','n','t']); rect(8,-2,1,4,'n'); rect(10,-2,1,4,'t'); P(11,4,'0'); P(12,5,'k');
+  if (fr){ line(6,14,4,19,'n'); line(10,14,12,19,'n'); } else { line(7,14,7,19,'n'); line(9,14,10,19,'n'); }
+  line(11,8,15,6,'S'); P(16,5,'S'); P(16,6,'S');
+  line(3,6,22,4,'N'); limb(18,6,19,14,1.2,'f'); P(19,15,'F'); P(18,15,'F'); P(20,6,'h'); P(18,9,'r'); P(19,10,'r');
+}); });
+var hunter={x:44,dir:1};
+function drawHunter(){
+  if (tick%2===0) hunter.x+=hunter.dir*0.25; if (hunter.x>62) hunter.dir=-1; if (hunter.x<36) hunter.dir=1;
+  dspr(RABBITH[(tick>>2)&1], PR.x+hunter.x-12, PR.y+166, hunter.dir<0);
+}
+function drawPrince(){
+  var kick=(tick>>2)&1;
+  dp(PR.x+97,PR.y+181,K.f); dp(PR.x+98,PR.y+181-kick,K.f); dp(PR.x+99,PR.y+180-kick,K.F);
+  dp(PR.x+97,PR.y+182,K.F); dp(PR.x+98,PR.y+183+kick,K.F); dp(PR.x+99,PR.y+184+kick,K.f);
+  for (var i=0;i<souls.length;i++){ var s=souls[i]; dp(PR.x+s.x,PR.y+s.y,K.f); dp(PR.x+s.x,PR.y+s.y+1,K.F); dp(PR.x+s.x+1,PR.y+s.y+1,K.f); }
+  if (tick%30<20){ dp(PR.x+70,PR.y+104,K.Y); } else dp(PR.x+70,PR.y+104,K.o);          // the tavern lamp flickers
+  var a=tick*0.05;                                                                  // souls led round the bagpipe
+  for (var k=0;k<4;k++){
+    var an=a+k*Math.PI/2, x=PR.x+42+Math.cos(an)*11, y=PR.y+84+Math.sin(an)*1.6;
+    var c1 = k&1 ? K.f : K.i, c2 = k&1 ? K.F : K.I;
+    dp(x,y,c1); dp(x,y-1,c1); dp(x,y-2,c2);
+  }
+}
+function drawNotes(){
+  for (var i=0;i<notes.length;i++){ var n=notes[i]; var f=n.life/60; dglyph(Math.round(PR.y+n.y)>>1, Math.round(PR.x+n.x), n.ch, f<0.5?K.s:(f<0.8?K['6']:K.I)); }
+}
+
+/* --- closed shutters --- */
+function drawClosed(){
+  var an=tick*0.02, r=104, cx=PC.c0+PL.w, cy=TOP*2+122;
+  var x=Math.round(cx+Math.cos(an)*r), y=Math.round(cy+Math.sin(an)*r);
+  dglyph(y>>1, x, '☼', K.L);
+  var an2=an*1.7+2;
+  dp(cx+Math.cos(an2)*(r-6), cy+Math.sin(an2)*(r-6), K.L);
+}
+
+/* ============================== start ============================= */
+triptychStart({
+  id:0,
+  paint:{ L:paintParadise, C:paintGarden, R:paintHell, doors:paintShutters },
+  byline:['hiERONYMUS bOSCH', 'tRiPTYCH, oiL oN oAK, c.1490-1510', 'mUSEO dEL pRADO, mADRiD'],
+  labels:{ L:'pARADiSE', C:'eARTHLY dELiGHTS', R:'hELL', closed:'tHE cREATiON oF tHE wORLD' },
+  texts:[                                                           // psalm 33:9, as on the wings
+    { r:TOP+3, c:PC.c0+PL.w/2-12, s:'§#e0e4d8iPSE DiXiT, eT fACTA sUNT', when:'shut' },
+    { r:TOP+3, c:PC.c0+PL.w*1.5-14, s:'§#e0e4d8iPSE mANDAViT, eT cREATA sUNT', when:'shut' }
+  ],
+  scroll:[ 'lEFT: pARADiSE, gOD pRESENTS eVE tO aDAM', 'cENTRE: tHE gARDEN, a cAVALCADE rOUND tHE bATHiNG pOOL',
+           'rIGHT: a mUSiCAL hELL, tHE tREE-mAN aND tHE pRiNCE oF hELL', 'cLOSED: tHE wORLD oN tHE tHiRD dAY oF cREATiON',
+           'oiL oN oAK, c.1490-1510, mUSEO dEL pRADO, mADRiD' ],
+  glitter:{ L:40, C:70 },
+  step:function(){ updateFountain(); updateHell(); },
+  draw:{
+    C:function(){ drawSwimmers(); drawFlyers(); drawBathers(); drawCavalcade(); drawWavers(); },
+    L:function(){ drawFlock(); drawSwans(); drawFountain(); drawRabbit(); drawButterflies(); },
+    R:function(){ drawBeams(); drawSkaters(); drawEars(); drawHunter(); drawPrince(); drawFire(); drawNotes(); },
+    closed:drawClosed
+  }
+});
+})();
+</script>
+</body>
+</html>

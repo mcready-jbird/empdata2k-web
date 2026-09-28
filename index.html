@@ -37,6 +37,7 @@ a.proj{position:absolute;display:block;overflow:hidden;white-space:nowrap;text-i
            (tURN oN jAVASCRiPT tO sEE tHE kNiGHTS aND tHE dRAGON)
 
       pROJECTS: <a href="https://pineapple.empdata2k.com/">pineapple</a> - sTAY aWAKE, lOOK aCTiVE
+                <a href="garden.html">bosch</a> - <a href="garden.html">tHE gARDEN</a>, <a href="haywain.html">tHE hAYWAiN</a>, <a href="anthony.html">sT aNTHONY</a>
 </pre></noscript>
 <script>
 (function(){
@@ -82,7 +83,8 @@ var LOGO_SHADOW = '#2a2aa8';
 // one entry = pixel icon (7x8 px -> 7 cols x 4 rows of half blocks) + 3 text rows.
 // icon letters index PCOL, '.' is transparent; info/info2 print grey on the right edge.
 var PCOL = {g:'#55ff55', d:'#00aa00', y:'#ffe14a', n:'#ffd21e', N:'#e08a00', o:'#7a3000',
-            k:'#000000', w:'#ffffff', r:'#ff5555', b:'#5555ff'};
+            k:'#000000', w:'#ffffff', r:'#ff5555', b:'#5555ff', p:'#ffb0c8'};
+// shut: how the icon closes its eyes when it blinks (default: the black 'k' pupils go yellow)
 var PROJECTS = [
   { name:'pineapple', url:'https://pineapple.empdata2k.com/',
     tag:'sTAY aWAKE, lOOK aCTiVE', info:'wiNDOWS tRAY uTiLiTY', info2:'bUiLT oN .NET 10',
@@ -93,17 +95,44 @@ var PROJECTS = [
           "nnknknn",
           "nnnnnnn",
           "nnooonn",
-          ".nnnnn."] }
+          ".nnnnn."] },
+  { name:'bosch', url:'garden.html', addr:'empdata2k.com/garden',
+    subs:[ { label:'tHE gARDEN',  url:'garden.html' },     // the tag line is these three names,
+           { label:'tHE hAYWAiN', url:'haywain.html' },   // each one a link of its own
+           { label:'sT aNTHONY',  url:'anthony.html' } ],
+    info:'tHREE aNiMATED tRiPTYCHS', info2:'fLY wiTH tHE mOUSE',
+    shut:{k:'w'},                       // the unicorn from paradise, pink mane, golden horn
+    icon:["...y...",
+          "..wy...",
+          ".pwww..",
+          "pwwkwww",
+          "pwwwwwp",
+          ".pwwww.",
+          ".pww...",
+          ".pww..."] }
 ];
+// subs: a project made of several pages shows their names as its tag line, comma separated
+PROJECTS.forEach(function(p){ if (p.subs) p.tag = p.subs.map(function(s){ return s.label; }).join(', '); });
 var ICON_COL = 6, TEXT_COL = 16, PROJ_H = 4;
+var PROJ_GAP = 2;                       // empty rows between two project entries
+var TAG_ROW = Math.ceil((PROJ_H-3)/2)+1;   // the tag line's row inside an entry
 var BLINK_EVERY = 90, BLINK_LEN = 4;   // icons blink every 4.5s, and once more while hovered
 var forceBlink = false;                // ?blink keeps the eyes shut, for screenshots
 function host(u){ return u.replace(/^https?:\/\//,'').replace(/\/$/,''); }
+function addr(p){ return p.addr || host(p.url); }
 function padLR(l,r){ return rep(' ',TEXT_COL) + l + rep(' ', Math.max(1, 79-TEXT_COL-vlen(l)-vlen(r))) + r; }
 function projectLines(p,hot){
   var name = (hot?'§e':'§f') + p.name;
   var tag  = (hot?'§f':'§7') + p.tag;
-  var url  = (hot?'§e»':'§8»') + ' ' + (hot?'§b':'§3') + host(p.url);
+  if (p.subs){                          // remember where each name sits, for its link and highlight
+    tag=''; p.subAt=[];
+    p.subs.forEach(function(s,i){
+      if (i) tag += '§8, ';
+      p.subAt.push({ c: TEXT_COL + vlen(tag), len: s.label.length });
+      tag += (hot?'§f':'§7') + s.label;
+    });
+  }
+  var url  = (hot?'§e»':'§8»') + ' ' + (hot?'§b':'§3') + addr(p);
   var info = (hot?'§7':'§8') + (p.info||'');
   var info2= (hot?'§7':'§8') + (p.info2||'');
   var out = [], pad = Math.ceil((PROJ_H-3)/2);
@@ -124,8 +153,9 @@ function applyProject(p){
   for (var r=0;r<PROJ_H;r++){ SCREEN[p.row+r] = parseLine(norm[r], p.row+r); p.hot.push(parseLine(hl[r], p.row+r)); }
   var cells = pixToCells(p.icon, PCOL);
   for (var rr=0; rr<cells.length; rr++) for (var c=0;c<cells[rr].length;c++){ if (cells[rr][c]) SCREEN[p.row+rr][ICON_COL+c] = cells[rr][c]; }
-  // same icon with the eyes ('k') filled in, drawn for a few ticks so the icon blinks
-  p.wink = pixToCells(p.icon.map(function(row){ return row.replace(/k/g,'n'); }), PCOL);
+  // same icon with the eyes shut (p.shut, by default 'k' becomes 'n'), drawn for a few ticks so the icon blinks
+  var shut = p.shut || {k:'n'};
+  p.wink = pixToCells(p.icon.map(function(row){ return row.replace(/./g,function(ch){ return shut[ch]||ch; }); }), PCOL);
   p.blinkOff = Math.floor(Math.random()*BLINK_EVERY);
 }
 
@@ -155,7 +185,10 @@ lines.push('');
 lines.push(rule('pROJECTS'));
 lines.push('');
 lines.push('');
-PROJECTS.forEach(function(p){ p.row = lines.length; projectLines(p,false).forEach(function(l){ lines.push(l); }); lines.push(''); });
+PROJECTS.forEach(function(p,i){
+  if (i) for (var g=1; g<PROJ_GAP; g++) lines.push('');
+  p.row = lines.length; projectLines(p,false).forEach(function(l){ lines.push(l); }); lines.push('');
+});
 lines.push('');
 lines.push(' §8'+rep('─',78));   // separates the projects from the scroller
 lines.push('');
@@ -734,7 +767,7 @@ function drawStars(){
   }
 }
 var SCROLL = '   »»»   wELCOME tO empdata2k   »»»   oNLiNE sINCE 1999, sTiLL 80x25 iN 2026   »»»   bEST vIEWED iN tEXT mODE oN a 14 iNCH cRT   »»»   nO fRAMEWORKS. nO cOOKiES. nO tRACKERS. jUST pURE aSCii aND oNE aNGRY dRAGON   »»»   kNiGHTS, pLEASE sTOP fIGHTiNG. tHE dRAGON iS wATCHiNG   »»»   cLiCK aNYWHERE uP tOP tO sUMMON a kNiGHT   »»»   ';
-PROJECTS.forEach(function(p){ SCROLL += 'cHECK oUT ' + p.name + ' - ' + p.tag + ' - ' + host(p.url) + '   »»»   '; });
+PROJECTS.forEach(function(p){ SCROLL += 'cHECK oUT ' + p.name + ' - ' + p.tag + ' - ' + addr(p) + '   »»»   '; });
 function drawScroller(){
   var off = Math.floor(tick/2);
   for (var c=0;c<COLS;c++){
@@ -748,7 +781,9 @@ function drawScroller(){
 /* ------------------------- project links -------------------------- */
 // real <a> elements laid over the canvas rows: clickable, focusable, middle-click friendly.
 // hovering or focusing one highlights the entry on the canvas.
-var hot = -1, links = [];
+// a project with subs also gets one small link over each name in its tag line, on top of the
+// entry's own link; hovering one lights the entry and that name
+var hot = -1, subHot = -1, links = [], sublinks = [];
 function initLinks(){
   PROJECTS.forEach(function(p,i){
     var a = document.createElement('a');
@@ -757,6 +792,14 @@ function initLinks(){
     a.addEventListener('mouseenter',on); a.addEventListener('focus',on);
     a.addEventListener('mouseleave',off); a.addEventListener('blur',off);
     wrap.appendChild(a); links.push(a);
+    (p.subs||[]).forEach(function(s,j){
+      var b = document.createElement('a');
+      b.className='proj'; b.href=s.url; b.textContent = p.name+' - '+s.label;
+      function son(){ hot=i; subHot=j; } function soff(){ if (subHot===j) subHot=-1; if (hot===i) hot=-1; }
+      b.addEventListener('mouseenter',son); b.addEventListener('focus',son);
+      b.addEventListener('mouseleave',soff); b.addEventListener('blur',soff);
+      wrap.appendChild(b); sublinks.push({ a:b, p:p, j:j });
+    });
   });
   placeLinks();
 }
@@ -766,6 +809,11 @@ function placeLinks(){
     var p=PROJECTS[i], st=links[i].style;
     st.left=(ox+(ICON_COL-1)*u)+'px'; st.top=(oy+p.row*v)+'px';
     st.width=((COLS-ICON_COL)*u)+'px'; st.height=(PROJ_H*v)+'px';
+  }
+  for (var k=0;k<sublinks.length;k++){
+    var sl=sublinks[k], at=sl.p.subAt[sl.j], ss=sl.a.style;
+    ss.left=(ox+at.c*u)+'px'; ss.top=(oy+(sl.p.row+TAG_ROW)*v)+'px';
+    ss.width=(at.len*u)+'px'; ss.height=v+'px';
   }
 }
 function drawIcons(){
@@ -782,6 +830,10 @@ function drawProjects(){
   if (hot<0) return;
   var p = PROJECTS[hot];
   for (var r=0;r<PROJ_H;r++) for (var c=TEXT_COL;c<COLS;c++){ var cell=p.hot[r][c]; putCell(ctx, p.row+r, c, cell.ch, cell.fg, null, true); }
+  if (p.subs && subHot>=0){                                                    // the hovered name goes yellow
+    var at=p.subAt[subHot], row=p.hot[TAG_ROW];
+    for (var sc=at.c; sc<at.c+at.len; sc++) putCell(ctx, p.row+TAG_ROW, sc, row[sc].ch, C(14), null, true);
+  }
   if ((tick>>2)&1) putCell(ctx, p.row+3, TEXT_COL, ' ', C(14), null, true);   // blinking marker
 }
 
@@ -831,6 +883,8 @@ if (qLow){ dragon.low=true; dragon.alt=7; dragon.y=7; }
 forceBlink = /[?&]blink(=|&|$)/.test(qs);
 var qHot = /[?&]hot=(\d+)/.exec(qs);
 if (qHot && PROJECTS[+qHot[1]]) hot = +qHot[1];
+var qSub = /[?&]sub=(\d+)/.exec(qs);                 // ?hot=1&sub=2 lights one name of a project with subs
+if (qSub) subHot = +qSub[1];
 if (/[?&]pop(=|&|$)/.test(qs)) for (var pk=0; pk<3; pk++) popKnight(LOGO_TOP+3+pk*3, LOGO_LEFT+10+pk*24);
 var qT = /[?&]t=(\d+)/.exec(qs);
 if (qT){ for (var ff=0; ff<Math.min(+qT[1],5000); ff++){ step(); if (qLow){ dragon.low=true; dragon.alt=7; } } }
